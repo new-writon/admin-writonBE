@@ -6,42 +6,34 @@ import jakarta.persistence.FetchType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
-import java.time.Instant;
+import jakarta.persistence.Table;
 import lombok.Getter;
 import lombok.Setter;
-import org.hibernate.annotations.ColumnDefault;
 import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
 
 @Getter
 @Setter
 @Entity
+@Table(name = "challenge_deposit_deduction")
 public class ChallengeDepositDeduction {
 
   @Id
-  @Column(name = "challenge_deposit_deduction_id", nullable = false)
-  private Integer id;
+  @Column(name = "challenge_deposit_deduction_id", columnDefinition = "int UNSIGNED not null")
+  private Long id;
+
+  @Column(name = "start_count", columnDefinition = "int UNSIGNED not null")
+  private Long startCount;
+
+  @Column(name = "deduction_amount", columnDefinition = "int UNSIGNED not null")
+  private Long deductionAmount;
+
+  @Column(name = "end_count", columnDefinition = "int UNSIGNED not null")
+  private Long endCount;
 
   @ManyToOne(fetch = FetchType.LAZY, optional = false)
   @OnDelete(action = OnDeleteAction.CASCADE)
   @JoinColumn(name = "challenge_id", nullable = false)
   private Challenge challenge;
-
-  @Column(name = "start_count", nullable = false)
-  private Integer startCount;
-
-  @Column(name = "deduction_amount", nullable = false)
-  private Integer deductionAmount;
-
-  @Column(name = "end_count", nullable = false)
-  private Integer endCount;
-
-  @ColumnDefault("CURRENT_TIMESTAMP(6)")
-  @Column(name = "created_at", nullable = false)
-  private Instant createdAt;
-
-  @ColumnDefault("CURRENT_TIMESTAMP(6)")
-  @Column(name = "updated_at", nullable = false)
-  private Instant updatedAt;
 
 }

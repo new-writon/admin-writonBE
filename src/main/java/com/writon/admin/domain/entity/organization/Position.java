@@ -7,37 +7,27 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
-import java.time.Instant;
 import lombok.Getter;
 import lombok.Setter;
-import org.hibernate.annotations.ColumnDefault;
 import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
 
 @Getter
 @Setter
 @Entity
-@Table(name = "Positions")
+@Table(name = "positions")
 public class Position {
 
   @Id
-  @Column(name = "position_id", nullable = false)
-  private Integer id;
+  @Column(name = "position_id", columnDefinition = "int UNSIGNED not null")
+  private Long id;
+
+  @Column(name = "name", nullable = false)
+  private String name;
 
   @ManyToOne(fetch = FetchType.LAZY, optional = false)
   @OnDelete(action = OnDeleteAction.CASCADE)
   @JoinColumn(name = "organization_id", nullable = false)
   private Organization organization;
-
-  @Column(name = "name", nullable = false, length = 45)
-  private String name;
-
-  @ColumnDefault("CURRENT_TIMESTAMP")
-  @Column(name = "created_at")
-  private Instant createdAt;
-
-  @ColumnDefault("CURRENT_TIMESTAMP")
-  @Column(name = "updated_at")
-  private Instant updatedAt;
 
 }

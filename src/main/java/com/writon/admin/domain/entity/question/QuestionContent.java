@@ -1,33 +1,28 @@
 package com.writon.admin.domain.entity.question;
 
+import com.writon.admin.domain.entity.activity.UserTemplate;
 import jakarta.persistence.Column;
-import jakarta.persistence.EmbeddedId;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
+import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.Lob;
 import jakarta.persistence.ManyToOne;
-import jakarta.persistence.MapsId;
-import java.time.Instant;
+import jakarta.persistence.Table;
 import lombok.Getter;
 import lombok.Setter;
-import org.hibernate.annotations.ColumnDefault;
 import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
 
 @Getter
 @Setter
 @Entity
+@Table(name = "question_contents")
 public class QuestionContent {
 
-  @EmbeddedId
-  private QuestionContentId id;
-
-  @MapsId("questionId")
-  @ManyToOne(fetch = FetchType.LAZY, optional = false)
-  @OnDelete(action = OnDeleteAction.CASCADE)
-  @JoinColumn(name = "question_id", nullable = false)
-  private Question question;
+  @Id
+  @Column(name = "question_content_id", columnDefinition = "int UNSIGNED not null")
+  private Long id;
 
   @Lob
   @Column(name = "content", nullable = false)
@@ -36,12 +31,14 @@ public class QuestionContent {
   @Column(name = "visibility", nullable = false)
   private Boolean visibility = false;
 
-  @ColumnDefault("CURRENT_TIMESTAMP(6)")
-  @Column(name = "created_at", nullable = false)
-  private Instant createdAt;
+  @ManyToOne(fetch = FetchType.LAZY, optional = false)
+  @OnDelete(action = OnDeleteAction.CASCADE)
+  @JoinColumn(name = "question_id", nullable = false)
+  private Question question;
 
-  @ColumnDefault("CURRENT_TIMESTAMP(6)")
-  @Column(name = "updated_at", nullable = false)
-  private Instant updatedAt;
+  @ManyToOne(fetch = FetchType.LAZY, optional = false)
+  @OnDelete(action = OnDeleteAction.CASCADE)
+  @JoinColumn(name = "user_template_id", nullable = false)
+  private UserTemplate userTemplate;
 
 }

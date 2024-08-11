@@ -3,19 +3,19 @@ package com.writon.admin.domain.entity.user;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
-import java.time.Instant;
+import jakarta.persistence.Table;
 import lombok.Getter;
 import lombok.Setter;
-import org.hibernate.annotations.ColumnDefault;
 
 @Getter
 @Setter
 @Entity
+@Table(name = "users")
 public class User {
 
   @Id
-  @Column(name = "user_id", nullable = false)
-  private Integer id;
+  @Column(name = "user_id", columnDefinition = "int UNSIGNED not null")
+  private Long id;
 
   @Column(name = "role", nullable = false, length = 20)
   private String role;
@@ -37,13 +37,5 @@ public class User {
 
   @Column(name = "bank", length = 20)
   private String bank;
-
-  @ColumnDefault("CURRENT_TIMESTAMP(6)")
-  @Column(name = "created_at", nullable = false)
-  private Instant createdAt;
-
-  @ColumnDefault("CURRENT_TIMESTAMP(6)")
-  @Column(name = "updated_at", nullable = false)
-  private Instant updatedAt;
 
 }
