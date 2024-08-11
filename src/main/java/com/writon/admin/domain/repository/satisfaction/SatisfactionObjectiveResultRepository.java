@@ -4,6 +4,6 @@ import com.writon.admin.domain.entity.satisfaction.SatisfactionObjectiveResult;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 public interface SatisfactionObjectiveResultRepository extends
-    JpaRepository<SatisfactionObjectiveResult, Integer> {
+    JpaRepository<SatisfactionObjectiveResult, Long> {
 
 }

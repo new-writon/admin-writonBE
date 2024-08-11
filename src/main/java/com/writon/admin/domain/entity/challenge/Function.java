@@ -3,29 +3,21 @@ package com.writon.admin.domain.entity.challenge;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
-import java.time.Instant;
+import jakarta.persistence.Table;
 import lombok.Getter;
 import lombok.Setter;
-import org.hibernate.annotations.ColumnDefault;
 
 @Getter
 @Setter
 @Entity
+@Table(name = "function")
 public class Function {
 
   @Id
-  @Column(name = "function_id", nullable = false)
-  private Integer id;
+  @Column(name = "function_id", columnDefinition = "int UNSIGNED not null")
+  private Long id;
 
-  @Column(name = "name", nullable = false, length = 45)
+  @Column(name = "name", nullable = false)
   private String name;
-
-  @ColumnDefault("CURRENT_TIMESTAMP")
-  @Column(name = "created_at")
-  private Instant createdAt;
-
-  @ColumnDefault("CURRENT_TIMESTAMP")
-  @Column(name = "updated_at")
-  private Instant updatedAt;
 
 }

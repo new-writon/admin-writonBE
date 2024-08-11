@@ -2,51 +2,39 @@ package com.writon.admin.domain.entity.user;
 
 import com.writon.admin.domain.entity.challenge.Challenge;
 import jakarta.persistence.Column;
-import jakarta.persistence.EmbeddedId;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
+import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
-import jakarta.persistence.MapsId;
-import java.time.Instant;
+import jakarta.persistence.Table;
 import java.time.LocalDate;
 import lombok.Getter;
 import lombok.Setter;
-import org.hibernate.annotations.ColumnDefault;
 import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
 
 @Getter
 @Setter
 @Entity
+@Table(name = "user_challenges")
 public class UserChallenge {
 
-  @EmbeddedId
-  private UserChallengeId id;
+  @Id
+  @Column(name = "user_challenge_id", columnDefinition = "int UNSIGNED not null")
+  private Long id;
 
-  @MapsId("challengeId")
-  @ManyToOne(fetch = FetchType.LAZY, optional = false)
-  @OnDelete(action = OnDeleteAction.CASCADE)
-  @JoinColumn(name = "challenge_id", nullable = false)
-  private Challenge challenge;
-
-  @MapsId("affiliationId")
-  @ManyToOne(fetch = FetchType.LAZY, optional = false)
-  @OnDelete(action = OnDeleteAction.CASCADE)
-  @JoinColumn(name = "affiliation_id", nullable = false, referencedColumnName = "affiliation_id")
-  private Affiliation affiliation;
-
-  @Column(name = "user_deposit", nullable = false)
-  private Integer userDeposit;
+  @Column(name = "user_deposit", columnDefinition = "int UNSIGNED not null")
+  private Long userDeposit;
 
   @Column(name = "review", nullable = false)
-  private Byte review;
+  private Boolean review = false;
 
-  @Column(name = "check_count")
-  private Integer checkCount;
+  @Column(name = "ckeck_count", columnDefinition = "int UNSIGNED")
+  private Long ckeckCount;
 
   @Column(name = "re_engagement")
-  private Byte reEngagement;
+  private Boolean reEngagement;
 
   @Column(name = "cheering_phrase")
   private String cheeringPhrase;
@@ -54,12 +42,14 @@ public class UserChallenge {
   @Column(name = "cheering_phrase_date")
   private LocalDate cheeringPhraseDate;
 
-  @ColumnDefault("CURRENT_TIMESTAMP(6)")
-  @Column(name = "created_at", nullable = false)
-  private Instant createdAt;
+  @ManyToOne(fetch = FetchType.LAZY, optional = false)
+  @OnDelete(action = OnDeleteAction.CASCADE)
+  @JoinColumn(name = "challenge_id", nullable = false)
+  private Challenge challenge;
 
-  @ColumnDefault("CURRENT_TIMESTAMP(6)")
-  @Column(name = "updated_at", nullable = false)
-  private Instant updatedAt;
+  @ManyToOne(fetch = FetchType.LAZY, optional = false)
+  @OnDelete(action = OnDeleteAction.CASCADE)
+  @JoinColumn(name = "affiliation_id", nullable = false)
+  private Affiliation affiliation;
 
 }

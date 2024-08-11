@@ -6,34 +6,30 @@ import jakarta.persistence.FetchType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
-import java.time.Instant;
+import jakarta.persistence.Table;
 import lombok.Getter;
 import lombok.Setter;
-import org.hibernate.annotations.ColumnDefault;
+import org.hibernate.annotations.OnDelete;
+import org.hibernate.annotations.OnDeleteAction;
 
 @Getter
 @Setter
 @Entity
+@Table(name = "challenge_function")
 public class ChallengeFunction {
 
   @Id
-  @Column(name = "challenge_function_id", nullable = false)
-  private Integer id;
+  @Column(name = "challenge_function_id", columnDefinition = "int UNSIGNED not null")
+  private Long id;
 
   @ManyToOne(fetch = FetchType.LAZY, optional = false)
-  @JoinColumn(name = "challenge_id", nullable = false)
-  private Challenge challenge;
-
-  @ManyToOne(fetch = FetchType.LAZY, optional = false)
+  @OnDelete(action = OnDeleteAction.CASCADE)
   @JoinColumn(name = "function_id", nullable = false)
   private Function function;
 
-  @ColumnDefault("CURRENT_TIMESTAMP")
-  @Column(name = "created_at")
-  private Instant createdAt;
-
-  @ColumnDefault("CURRENT_TIMESTAMP")
-  @Column(name = "updated_at")
-  private Instant updatedAt;
+  @ManyToOne(fetch = FetchType.LAZY, optional = false)
+  @OnDelete(action = OnDeleteAction.CASCADE)
+  @JoinColumn(name = "challenge_id", nullable = false)
+  private Challenge challenge;
 
 }

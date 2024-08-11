@@ -2,56 +2,46 @@ package com.writon.admin.domain.entity.activity;
 
 import com.writon.admin.domain.entity.user.Affiliation;
 import jakarta.persistence.Column;
-import jakarta.persistence.EmbeddedId;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
+import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.Lob;
 import jakarta.persistence.ManyToOne;
-import jakarta.persistence.MapsId;
-import java.time.Instant;
+import jakarta.persistence.Table;
 import lombok.Getter;
 import lombok.Setter;
-import org.hibernate.annotations.ColumnDefault;
 import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
 
 @Getter
 @Setter
 @Entity
+@Table(name = "comments")
 public class Comment {
 
-  @EmbeddedId
-  private CommentId id;
-
-  @MapsId("userTempleteId")
-  @ManyToOne(fetch = FetchType.LAZY, optional = false)
-  @OnDelete(action = OnDeleteAction.CASCADE)
-  @JoinColumn(name = "user_templete_id", nullable = false)
-  private UserTemplate userTemplete;
-
-  @MapsId("affiliationId")
-  @ManyToOne(fetch = FetchType.LAZY, optional = false)
-  @OnDelete(action = OnDeleteAction.CASCADE)
-  @JoinColumn(name = "affiliation_id", nullable = false, referencedColumnName = "affiliation_id")
-  private Affiliation affiliation;
+  @Id
+  @Column(name = "comment_id", columnDefinition = "int UNSIGNED not null")
+  private Long id;
 
   @Lob
   @Column(name = "content", nullable = false)
   private String content;
 
-  @Column(name = "comment_group")
-  private Integer commentGroup;
+  @Column(name = "`check`", nullable = false)
+  private Boolean check = false;
 
-  @Column(name = "`check`")
-  private Byte check;
+  @Column(name = "comment_group", columnDefinition = "int UNSIGNED")
+  private Long commentGroup;
 
-  @ColumnDefault("CURRENT_TIMESTAMP(6)")
-  @Column(name = "created_at", nullable = false)
-  private Instant createdAt;
+  @ManyToOne(fetch = FetchType.LAZY, optional = false)
+  @OnDelete(action = OnDeleteAction.CASCADE)
+  @JoinColumn(name = "affiliation_id", nullable = false)
+  private Affiliation affiliation;
 
-  @ColumnDefault("CURRENT_TIMESTAMP(6)")
-  @Column(name = "updated_at", nullable = false)
-  private Instant updatedAt;
+  @ManyToOne(fetch = FetchType.LAZY, optional = false)
+  @OnDelete(action = OnDeleteAction.CASCADE)
+  @JoinColumn(name = "user_template_id", nullable = false)
+  private UserTemplate userTemplate;
 
 }
