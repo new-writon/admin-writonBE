@@ -2,8 +2,17 @@
 server:
   port: 8080
 
-# ========== MySQL ==========
+# ========== MySQL, Redis ==========
 spring:
+  cache:
+    type: redis
+  data:
+    redis:
+      host: ${REDIS_HOST}
+      port: ${REDIS_PORT}
+  main:
+    allow-bean-definition-overriding: true
+
   datasource:
     url: "jdbc:mysql://localhost/writon"
     username: ${MYSQL_USERNAME}
@@ -16,11 +25,13 @@ spring:
       hibernate:
         show_sql: true
         format_sql: true
-        dialect: org.hibernate.dialect.MySQL8Dialect
+        dialect: org.hibernate.dialect.MySQLDialect
+
 
 # ========== JWT ==========
 jwt:
   secret: ${JWT_SECRET_KEY}
+
 
 # ========== AWS S3 ==========
 cloud:
