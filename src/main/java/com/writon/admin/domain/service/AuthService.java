@@ -2,8 +2,9 @@ package com.writon.admin.domain.service;
 
 import com.writon.admin.domain.dto.request.auth.LoginRequestDto;
 import com.writon.admin.domain.dto.request.auth.SignUpRequestDto;
-import com.writon.admin.domain.dto.request.auth.TokenRequestDto;
+import com.writon.admin.domain.dto.request.auth.ReissueRequestDto;
 import com.writon.admin.domain.dto.response.auth.LoginResponseDto;
+import com.writon.admin.domain.dto.response.auth.ReissueResponseDto;
 import com.writon.admin.domain.dto.response.auth.SignUpResponseDto;
 import com.writon.admin.domain.entity.organization.AdminUser;
 import com.writon.admin.domain.entity.organization.Organization;
@@ -86,5 +87,33 @@ public class AuthService {
   }
 
   // ========== Reissue API ==========
+  public ReissueResponseDto reissue(ReissueRequestDto reissueRequestDto) {
+    // 1. Refresh Token 검증
+    if (!tokenProvider.validateToken(reissueRequestDto.getRefreshToken())) {
+      throw new RuntimeException("Refresh Token 이 유효하지 않습니다.");
+    }
+
+    // 2. Access Token 에서 Member ID 가져오기
+    Authentication authentication = tokenProvider.getAuthentication(reissueRequestDto.getAccessToken());
+
+    // 3. 저장소에서 Member ID 를 기반으로 Refresh Token 값 가져옴
+    RefreshToken refreshToken = refreshTokenRepository.findByIdentifier(authentication.getName())
+        .orElseThrow(() -> new RuntimeException("로그아웃 된 사용자입니다."));
+
+    // 4. Refresh Token 일치하는지 검사
+    if (!refreshToken.getToken().equals(reissueRequestDto.getRefreshToken())) {
+      throw new RuntimeException("토큰의 유저 정보가 일치하지 않습니다.");
+    }
+
+    // 5. 새로운 토큰 생성
+    TokenDto tokenDto = tokenProvider.createToken(authentication);
+
+    // 6. 저장소 정보 업데이트
+    RefreshToken newRefreshToken = refreshToken.updateToken(tokenDto.getRefreshToken());
+    refreshTokenRepository.save(newRefreshToken);
+
+    // 7. 토큰 발급
+    return new ReissueResponseDto(tokenDto.getAccessToken(), tokenDto.getRefreshToken());
+  }
 
 }

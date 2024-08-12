@@ -1,8 +1,10 @@
 package com.writon.admin.domain.controller.auth;
 
 import com.writon.admin.domain.dto.request.auth.LoginRequestDto;
+import com.writon.admin.domain.dto.request.auth.ReissueRequestDto;
 import com.writon.admin.domain.dto.request.auth.SignUpRequestDto;
 import com.writon.admin.domain.dto.response.auth.LoginResponseDto;
+import com.writon.admin.domain.dto.response.auth.ReissueResponseDto;
 import com.writon.admin.domain.dto.response.auth.SignUpResponseDto;
 import com.writon.admin.domain.service.AuthService;
 import com.writon.admin.global.response.SuccessDto;
@@ -33,6 +35,11 @@ public class AuthController {
     return new SuccessDto<>(loginResponseDto);
   }
 
+  @PostMapping("/reissue")
+  public SuccessDto<ReissueResponseDto> reissue(@RequestBody ReissueRequestDto reissueRequestDto) {
+    ReissueResponseDto reissueResponseDto = authService.reissue(reissueRequestDto);
+
+    return new SuccessDto<>(reissueResponseDto);
   }
 
 }
