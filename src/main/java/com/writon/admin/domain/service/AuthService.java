@@ -3,17 +3,22 @@ package com.writon.admin.domain.service;
 import com.writon.admin.domain.dto.request.auth.LoginRequestDto;
 import com.writon.admin.domain.dto.request.auth.SignUpRequestDto;
 import com.writon.admin.domain.dto.request.auth.TokenRequestDto;
+import com.writon.admin.domain.dto.response.auth.LoginResponseDto;
 import com.writon.admin.domain.dto.response.auth.SignUpResponseDto;
 import com.writon.admin.domain.entity.organization.AdminUser;
+import com.writon.admin.domain.entity.organization.Organization;
 import com.writon.admin.domain.entity.token.RefreshToken;
 import com.writon.admin.domain.repository.organization.AdminUserRepository;
+import com.writon.admin.domain.repository.organization.OrganizationRepository;
 import com.writon.admin.domain.repository.token.RefreshTokenRepository;
 import com.writon.admin.global.config.auth.TokenDto;
 import com.writon.admin.global.config.auth.TokenProvider;
+import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -42,7 +47,8 @@ public class AuthService {
     return new SignUpResponseDto(adminUser.getId(), adminUser.getIdentifier());
   }
 
-  public TokenDto login(LoginRequestDto loginRequestDto) {
+  // ========== Login API ==========
+  public LoginResponseDto login(LoginRequestDto loginRequestDto) {
 
     // 1. Login ID/PW 를 기반으로 AuthenticationToken 생성
     UsernamePasswordAuthenticationToken authenticationToken = loginRequestDto.toAuthentication();
@@ -63,9 +69,22 @@ public class AuthService {
 
     refreshTokenRepository.save(refreshToken);
 
-    // 5. 토큰 발급
-    return tokenDto;
+    // 5. 해당 Organization 정보 가져오기
+    AdminUser adminUser = adminUserRepository.findByIdentifier(authentication.getName())
+        .orElseThrow(() -> new UsernameNotFoundException(" -> 데이터베이스에서 찾을 수 없습니다."));
+    Optional<Organization> organization = organizationRepository.findByAdminUserId(adminUser.getId());
+
+    // 6. Response 전달
+    return new LoginResponseDto(
+        tokenDto.getAccessToken(),
+        tokenDto.getRefreshToken(),
+        organization.isPresent(),
+        organization.map(Organization::getId).orElse(null),
+        organization.map(Organization::getName).orElse(null),
+        organization.map(Organization::getLogo).orElse(null)
+    );
   }
 
+  // ========== Reissue API ==========
 
 }

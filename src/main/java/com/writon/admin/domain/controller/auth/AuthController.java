@@ -2,11 +2,11 @@ package com.writon.admin.domain.controller.auth;
 
 import com.writon.admin.domain.dto.request.auth.LoginRequestDto;
 import com.writon.admin.domain.dto.request.auth.SignUpRequestDto;
+import com.writon.admin.domain.dto.response.auth.LoginResponseDto;
 import com.writon.admin.domain.dto.response.auth.SignUpResponseDto;
 import com.writon.admin.domain.service.AuthService;
-import com.writon.admin.global.config.auth.TokenDto;
+import com.writon.admin.global.response.SuccessDto;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -27,8 +27,12 @@ public class AuthController {
   }
 
   @PostMapping("/login")
-  public ResponseEntity<TokenDto> login(@RequestBody LoginRequestDto loginRequestDto) {
-    return ResponseEntity.ok(authService.login(loginRequestDto));
+  public SuccessDto<LoginResponseDto> login(@RequestBody LoginRequestDto loginRequestDto) {
+    LoginResponseDto loginResponseDto = authService.login(loginRequestDto);
+
+    return new SuccessDto<>(loginResponseDto);
+  }
+
   }
 
 }
