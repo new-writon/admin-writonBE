@@ -39,7 +39,7 @@ public class TokenProvider {
     this.key = Keys.hmacShaKeyFor(keyBytes);
   }
 
-  // 유저 정보를 가지고 AccessToken, RefreshToken을 생성하는 메서드
+  // 유저 정보를 가지고 AccessToken, RefreshToken 을 생성하는 메서드
   public TokenDto createToken(Authentication authentication) {
 
     // 토큰의 expire 시간을 설정

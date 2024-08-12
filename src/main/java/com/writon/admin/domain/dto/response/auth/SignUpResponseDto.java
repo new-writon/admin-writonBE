@@ -13,10 +13,4 @@ public class SignUpResponseDto {
   private Long id;
   private String identifier;
 
-  public static SignUpResponseDto of(AdminUser adminUser) {
-    return new SignUpResponseDto(
-        adminUser.getId(),
-        adminUser.getIdentifier()
-    );
-  }
 }
