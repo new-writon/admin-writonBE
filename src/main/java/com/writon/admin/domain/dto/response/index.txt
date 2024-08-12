@@ -1,1 +1,0 @@
-responseDTO 관련 폴더
