@@ -22,18 +22,24 @@ import org.springframework.stereotype.Service;
 public class AuthService {
 
   private final AdminUserRepository adminUserRepository;
+  private final OrganizationRepository organizationRepository;
+
   private final PasswordEncoder passwordEncoder;
   private final AuthenticationManagerBuilder authenticationManagerBuilder;
   private final RefreshTokenRepository refreshTokenRepository;
   private final TokenProvider tokenProvider;
 
+
+  // ========== SignUp API ==========
   public SignUpResponseDto signup(SignUpRequestDto signUpRequestDto) {
     if (adminUserRepository.existsByIdentifier(signUpRequestDto.getIdentifier())) {
       throw new RuntimeException("이미 가입되어 있는 유저입니다");
     }
 
-    AdminUser adminUser = signUpRequestDto.toAdminUser(passwordEncoder);
-    return SignUpResponseDto.of(adminUserRepository.save(adminUser));
+    AdminUser encodedAdminUser = signUpRequestDto.toAdminUser(passwordEncoder);
+    AdminUser adminUser = adminUserRepository.save(encodedAdminUser);
+
+    return new SignUpResponseDto(adminUser.getId(), adminUser.getIdentifier());
   }
 
   public TokenDto login(LoginRequestDto loginRequestDto) {

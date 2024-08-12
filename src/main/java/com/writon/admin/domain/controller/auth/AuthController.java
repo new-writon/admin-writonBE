@@ -20,8 +20,10 @@ public class AuthController {
   private final AuthService authService;
 
   @PostMapping("/signup")
-  public ResponseEntity<SignUpResponseDto> signup(@RequestBody SignUpRequestDto signUpRequestDto) {
-    return ResponseEntity.ok(authService.signup(signUpRequestDto));
+  public SuccessDto<SignUpResponseDto> signup(@RequestBody SignUpRequestDto signUpRequestDto) {
+    SignUpResponseDto signUpResponseDto = authService.signup(signUpRequestDto);
+
+    return new SuccessDto<>(signUpResponseDto);
   }
 
   @PostMapping("/login")
