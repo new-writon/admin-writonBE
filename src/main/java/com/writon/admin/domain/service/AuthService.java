@@ -14,11 +14,14 @@ import com.writon.admin.domain.repository.organization.OrganizationRepository;
 import com.writon.admin.domain.repository.token.RefreshTokenRepository;
 import com.writon.admin.global.config.auth.TokenDto;
 import com.writon.admin.global.config.auth.TokenProvider;
+import com.writon.admin.global.error.CustomException;
+import com.writon.admin.global.error.ErrorCode;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -93,12 +96,12 @@ public class AuthService {
       throw new RuntimeException("Refresh Token 이 유효하지 않습니다.");
     }
 
-    // 2. Access Token 에서 Member ID 가져오기
+    // 2. Access Token 에서 identifier 가져오기
     Authentication authentication = tokenProvider.getAuthentication(reissueRequestDto.getAccessToken());
 
     // 3. 저장소에서 Member ID 를 기반으로 Refresh Token 값 가져옴
     RefreshToken refreshToken = refreshTokenRepository.findByIdentifier(authentication.getName())
-        .orElseThrow(() -> new RuntimeException("로그아웃 된 사용자입니다."));
+        .orElseThrow(() -> new CustomException(ErrorCode.LOGOUT_USER));
 
     // 4. Refresh Token 일치하는지 검사
     if (!refreshToken.getToken().equals(reissueRequestDto.getRefreshToken())) {
@@ -116,4 +119,16 @@ public class AuthService {
     return new ReissueResponseDto(tokenDto.getAccessToken(), tokenDto.getRefreshToken());
   }
 
+  // ========== Logout API ==========
+  public void logout() {
+
+    // 1. 사용자 이름을 가져오기
+    Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+    String identifier = authentication.getName();
+
+    // 2. RefreshToken 삭제
+    RefreshToken refreshToken = refreshTokenRepository.deleteByIdentifier(identifier)
+        .orElseThrow(() -> new CustomException(ErrorCode.LOGOUT_USER));
+
+  }
 }
