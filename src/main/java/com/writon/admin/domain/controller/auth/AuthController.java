@@ -9,6 +9,7 @@ import com.writon.admin.domain.dto.response.auth.SignUpResponseDto;
 import com.writon.admin.domain.service.AuthService;
 import com.writon.admin.global.response.SuccessDto;
 import lombok.RequiredArgsConstructor;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -40,6 +41,13 @@ public class AuthController {
     ReissueResponseDto reissueResponseDto = authService.reissue(reissueRequestDto);
 
     return new SuccessDto<>(reissueResponseDto);
+  }
+
+  @DeleteMapping("/logout")
+  public SuccessDto<Void> logout() {
+    authService.logout();
+
+    return new SuccessDto<>();
   }
 
 }
