@@ -134,6 +134,53 @@ public class ChallengeService {
     return statusTable;
   }
 
+  // ========== Get Questions API ==========
+  public QuestionsResponseDto getQuestions(Long challengeId) {
+    // 1. 질문 리스트 추출
+    List<Question> questionList = questionRepository.findByChallengeId(challengeId)
+        .orElseThrow(() -> new CustomException((ErrorCode.ETC_ERROR)));
+    questionList.sort(Comparator.comparing(question ->
+        question.getKeyword() != null
+            ? question.getKeyword().getId()
+            : Long.MAX_VALUE)); // keyword 기준으로 정렬
+
+    // 2. 베이직질문, 스페셜질문 할당
+    List<String> basicQuestions = new ArrayList<>();
+    List<SpecialQuestion> specialQuestions = new ArrayList<>();
+    String curKeyword = null;
+    List<String> questions = new ArrayList<>();
+
+    for (Question question : questionList) {
+      String questionText = question.getQuestion();
+      String category = question.getCategory();
+
+      // 베이직 질문 추가
+      if (category.equals("베이직 질문")) {
+        basicQuestions.add(questionText);
+      } else {
+        // 스페셜 질문 추가
+        String keyword = question.getKeyword().getKeyword();
+
+        if (keyword.equals(curKeyword)) {
+          questions.add(questionText);
+        } else {
+          if (curKeyword != null) {
+            specialQuestions.add(new SpecialQuestion(curKeyword, questions));
+          }
+
+          curKeyword = keyword;
+          questions = new ArrayList<>();
+
+          questions.add(questionText);
+        }
+      }
+    }
+
+    if (curKeyword != null) {
+      specialQuestions.add(new SpecialQuestion(curKeyword, questions));
+    }
+
+    return new QuestionsResponseDto(basicQuestions, specialQuestions);
   }
 
 }

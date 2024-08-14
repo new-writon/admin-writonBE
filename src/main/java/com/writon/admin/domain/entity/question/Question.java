@@ -39,7 +39,7 @@ public class Question {
   @JoinColumn(name = "challenge_id", nullable = false)
   private Challenge challenge;
 
-  @ManyToOne(fetch = FetchType.LAZY)
+  @ManyToOne(fetch = FetchType.EAGER)
   @OnDelete(action = OnDeleteAction.CASCADE)
   @JoinColumn(name = "keyword_id")
   private Keyword keyword;

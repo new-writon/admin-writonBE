@@ -38,4 +38,11 @@ public class ChallengeController {
     return new SuccessDto<>(userStatusList);
   }
 
+  @GetMapping("/questions")
+  public SuccessDto<QuestionsResponseDto> getQuestions(@RequestParam Long challengeId) {
+    QuestionsResponseDto responseDto = challengeService.getQuestions(challengeId);
+
+    return new SuccessDto<>(responseDto);
+  }
+
 }
