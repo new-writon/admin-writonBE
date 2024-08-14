@@ -1,4 +1,4 @@
-package com.writon.admin.domain.controller.auth;
+package com.writon.admin.domain.controller;
 
 import com.writon.admin.domain.dto.request.auth.LoginRequestDto;
 import com.writon.admin.domain.dto.request.auth.ReissueRequestDto;

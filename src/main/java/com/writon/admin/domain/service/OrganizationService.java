@@ -12,6 +12,7 @@ import com.writon.admin.domain.entity.organization.Position;
 import com.writon.admin.domain.repository.organization.AdminUserRepository;
 import com.writon.admin.domain.repository.organization.OrganizationRepository;
 import com.writon.admin.domain.repository.organization.PositionRepository;
+import com.writon.admin.domain.util.TokenUtil;
 import com.writon.admin.global.error.CustomException;
 import com.writon.admin.global.error.ErrorCode;
 import java.io.IOException;
@@ -29,15 +30,13 @@ public class OrganizationService {
   private final OrganizationRepository organizationRepository;
   private final AdminUserRepository adminUserRepository;
   private final AmazonS3 amazonS3Client;
+  private final TokenUtil tokenUtil;
 
 
   // ========== Create API ==========
   public CreateResponseDto create(CreateRequestDto createRequestDto) {
     // 1. 사용자 정보 불러오기
-    Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-    AdminUser adminUser =
-        adminUserRepository.findByIdentifier(authentication.getName())
-            .orElseThrow(() -> new CustomException(ErrorCode.TOKEN_ERROR));
+    AdminUser adminUser = tokenUtil.getAdminUser();
 
     // 2. Organization 객체 생성
     Organization organization = new Organization(
