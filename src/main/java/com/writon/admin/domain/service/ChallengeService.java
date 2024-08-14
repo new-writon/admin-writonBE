@@ -1,23 +1,38 @@
 package com.writon.admin.domain.service;
 
 import com.writon.admin.domain.dto.request.challenge.CreateChallengeRequestDto;
-import com.writon.admin.domain.dto.request.challenge.SpecialQuestionResponse;
-import com.writon.admin.domain.dto.response.challenge.ChallengeResponse;
+import com.writon.admin.domain.dto.response.challenge.ChallengeInfoResponseDto;
+import com.writon.admin.domain.dto.response.challenge.QuestionsResponseDto;
+import com.writon.admin.domain.entity.lcoal.SpecialQuestion;
+import com.writon.admin.domain.entity.lcoal.ChallengeResponse;
 import com.writon.admin.domain.dto.response.challenge.CreateChallengeResponseDto;
+import com.writon.admin.domain.entity.lcoal.Status;
+import com.writon.admin.domain.entity.lcoal.UserStatus;
+import com.writon.admin.domain.entity.activity.UserTemplate;
 import com.writon.admin.domain.entity.challenge.Challenge;
 import com.writon.admin.domain.entity.challenge.ChallengeDay;
 import com.writon.admin.domain.entity.challenge.Email;
 import com.writon.admin.domain.entity.organization.Organization;
 import com.writon.admin.domain.entity.question.Keyword;
 import com.writon.admin.domain.entity.question.Question;
+import com.writon.admin.domain.entity.user.UserChallenge;
+import com.writon.admin.domain.repository.activity.UserTemplateRepository;
 import com.writon.admin.domain.repository.challenge.ChallengeDayRepository;
 import com.writon.admin.domain.repository.challenge.ChallengeRepository;
 import com.writon.admin.domain.repository.challenge.EmailRepository;
 import com.writon.admin.domain.repository.question.KeywordRepository;
 import com.writon.admin.domain.repository.question.QuestionRepository;
+import com.writon.admin.domain.repository.user.UserChallengeRepository;
 import com.writon.admin.domain.util.TokenUtil;
+import com.writon.admin.global.error.CustomException;
+import com.writon.admin.global.error.ErrorCode;
 import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -32,11 +47,13 @@ public class ChallengeService {
   private final QuestionRepository questionRepository;
   private final KeywordRepository keywordRepository;
   private final TokenUtil tokenUtil;
+  private final UserChallengeRepository userChallengeRepository;
+  private final UserTemplateRepository userTemplateRepository;
 
+  // ========== Create API ==========
   public CreateChallengeResponseDto createChallenge(CreateChallengeRequestDto requestDto) {
     // 1. 조직정보 추출
     Organization organization = tokenUtil.getOrganization();
-    System.out.println("1. " + organization.getName());
 
     // 2. 챌린지 정보 저장
     Challenge challenge = challengeRepository.save(new Challenge(
@@ -45,13 +62,11 @@ public class ChallengeService {
         requestDto.getEndDate(),
         organization
     ));
-    System.out.println("2. " + challenge.getName());
 
     // 3. 챌린지 날짜정보 저장
     for (LocalDate date : requestDto.getDates()) {
       challengeDayRepository.save(new ChallengeDay(date, challenge));
     }
-    System.out.println("3. 날짜정보 저장");
 
     // 4. 질문정보 저장
     for (String basicQuestion : requestDto.getBasicQuestions()) {
@@ -59,7 +74,7 @@ public class ChallengeService {
           new Question(basicQuestion, "베이직 질문", challenge)
       );
     }
-    for (SpecialQuestionResponse specialQuestionResponse : requestDto.getSpecialQuestions()) {
+    for (SpecialQuestion specialQuestionResponse : requestDto.getSpecialQuestions()) {
       Keyword keyword = keywordRepository.save(new Keyword(specialQuestionResponse.getKeyword()));
 
       for (String specialQuestion : specialQuestionResponse.getQuestions()) {
@@ -68,13 +83,11 @@ public class ChallengeService {
         );
       }
     }
-    System.out.println("4. 질문정보 저장");
 
     // 5. 이메일정보 저장
     for (String email : requestDto.getEmailList()) {
       emailRepository.save(new Email(email, challenge));
     }
-    System.out.println("5. 이메일정보 저장");
 
     // 6. Response 생성
     List<Challenge> challenges = challengeRepository.findByOrganizationId(organization.getId());
@@ -84,4 +97,43 @@ public class ChallengeService {
 
     return new CreateChallengeResponseDto(challengeList);
   }
+
+  // ========== Get Dashboard API ==========
+  public List<UserStatus> getDashboard(Long challengeId) {
+    // 1. 챌린지 날짜 리스트 추출
+    List<ChallengeDay> challengeDayList = challengeDayRepository.findByChallengeId(challengeId)
+        .orElseThrow(() -> new CustomException(ErrorCode.ETC_ERROR));
+
+    // 2. 챌린지 참여 유저 리스트 추출
+    List<UserChallenge> userChallengeList = userChallengeRepository.findByChallengeId(challengeId)
+        .orElseThrow(() -> new CustomException(ErrorCode.ETC_ERROR));
+
+    // 3. 유저별 참여여부 확인
+    List<UserStatus> statusTable = new ArrayList<>();
+
+    for (UserChallenge userChallenge : userChallengeList) {
+      List<Status> statusList = new ArrayList<>();
+      List<UserTemplate> userTemplateList = userTemplateRepository.findByUserChallengeId(
+              userChallenge.getId())
+          .orElseThrow(() -> new CustomException(ErrorCode.ETC_ERROR));
+
+      for (ChallengeDay challengeDay : challengeDayList) {
+        // 참여여부 확인과정
+        int status = -1;
+        for (UserTemplate userTemplate : userTemplateList) {
+          if (userTemplate.getTemplateDate().equals(challengeDay.getDay())) {
+            status = userTemplate.getComplete() ? 1 : 0;
+            break;
+          }
+        }
+        statusList.add(new Status(challengeDay.getDay(), status));
+      }
+      statusTable.add(new UserStatus(userChallenge.getAffiliation().getNickname(), statusList));
+    }
+
+    return statusTable;
+  }
+
+  }
+
 }
