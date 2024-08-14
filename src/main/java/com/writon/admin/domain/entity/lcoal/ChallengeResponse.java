@@ -1,4 +1,4 @@
-package com.writon.admin.domain.dto.response.challenge;
+package com.writon.admin.domain.entity.lcoal;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
