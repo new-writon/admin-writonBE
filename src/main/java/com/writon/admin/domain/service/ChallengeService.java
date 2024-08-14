@@ -183,4 +183,22 @@ public class ChallengeService {
     return new QuestionsResponseDto(basicQuestions, specialQuestions);
   }
 
+  // ========== Get Info API ==========
+  public ChallengeInfoResponseDto getInfo(Long challengeId) {
+    // 1. 챌린지 기본 정보 가져오기
+    Challenge challenge = challengeRepository.findById(challengeId)
+        .orElseThrow(() -> new CustomException(ErrorCode.ETC_ERROR));
+
+    // 2. 챌린지 날짜 정보 가져오기
+    List<ChallengeDay> challengeDays = challengeDayRepository.findByChallengeId(challengeId)
+        .orElseThrow(() -> new CustomException(ErrorCode.ETC_ERROR));
+
+    return new ChallengeInfoResponseDto(
+        challenge.getName(),
+        challenge.getStartAt(),
+        challenge.getFinishAt(),
+        challengeDays.stream().map(ChallengeDay::getDay).collect(Collectors.toList())
+    );
+  }
+
 }

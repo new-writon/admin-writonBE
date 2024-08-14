@@ -1,7 +1,9 @@
 package com.writon.admin.domain.controller;
 
 import com.writon.admin.domain.dto.request.challenge.CreateChallengeRequestDto;
+import com.writon.admin.domain.dto.response.challenge.ChallengeInfoResponseDto;
 import com.writon.admin.domain.dto.response.challenge.CreateChallengeResponseDto;
+import com.writon.admin.domain.dto.response.challenge.QuestionsResponseDto;
 import com.writon.admin.domain.entity.lcoal.UserStatus;
 import com.writon.admin.domain.service.ChallengeService;
 import com.writon.admin.global.response.SuccessDto;
@@ -45,4 +47,10 @@ public class ChallengeController {
     return new SuccessDto<>(responseDto);
   }
 
+  @GetMapping("/info")
+  public SuccessDto<ChallengeInfoResponseDto> getInfo(@RequestParam Long challengeId) {
+    ChallengeInfoResponseDto responseDto = challengeService.getInfo(challengeId);
+
+    return new SuccessDto<>(responseDto);
+  }
 }
