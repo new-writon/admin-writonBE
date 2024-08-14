@@ -19,7 +19,6 @@ import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
 
 @Getter
-@Setter
 @Entity
 @Table(name = "challenges")
 @NoArgsConstructor
