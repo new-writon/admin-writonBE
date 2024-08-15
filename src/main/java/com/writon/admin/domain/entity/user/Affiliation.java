@@ -51,7 +51,7 @@ public class Affiliation {
   @JoinColumn(name = "organization_id", nullable = false)
   private Organization organization;
 
-  @ManyToOne(fetch = FetchType.LAZY, optional = false)
+  @ManyToOne(fetch = FetchType.EAGER, optional = false)
   @OnDelete(action = OnDeleteAction.CASCADE)
   @JoinColumn(name = "user_id", nullable = false)
   private User user;
