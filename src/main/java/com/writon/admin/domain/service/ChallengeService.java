@@ -144,41 +144,21 @@ public class ChallengeService {
             ? question.getKeyword().getId()
             : Long.MAX_VALUE)); // keyword 기준으로 정렬
 
-    // 2. 베이직질문, 스페셜질문 할당
-    List<String> basicQuestions = new ArrayList<>();
-    List<SpecialQuestion> specialQuestions = new ArrayList<>();
-    String curKeyword = null;
-    List<String> questions = new ArrayList<>();
+    List<String> basicQuestions = questionList.stream()
+        .filter(question -> "베이직 질문".equals(question.getCategory()))
+        .map(Question::getQuestion)
+        .toList();
 
-    for (Question question : questionList) {
-      String questionText = question.getQuestion();
-      String category = question.getCategory();
-
-      // 베이직 질문 추가
-      if (category.equals("베이직 질문")) {
-        basicQuestions.add(questionText);
-      } else {
-        // 스페셜 질문 추가
-        String keyword = question.getKeyword().getKeyword();
-
-        if (keyword.equals(curKeyword)) {
-          questions.add(questionText);
-        } else {
-          if (curKeyword != null) {
-            specialQuestions.add(new SpecialQuestion(curKeyword, questions));
-          }
-
-          curKeyword = keyword;
-          questions = new ArrayList<>();
-
-          questions.add(questionText);
-        }
-      }
-    }
-
-    if (curKeyword != null) {
-      specialQuestions.add(new SpecialQuestion(curKeyword, questions));
-    }
+    List<SpecialQuestion> specialQuestions = questionList.stream()
+        .filter(question -> question.getKeyword() != null)
+        .collect(Collectors.groupingBy(
+            question -> question.getKeyword().getKeyword(),
+            LinkedHashMap::new,  // 순서를 유지하기 위해 LinkedHashMap 사용
+            Collectors.mapping(Question::getQuestion, Collectors.toList())
+        ))
+        .entrySet().stream()
+        .map(entry -> new SpecialQuestion(entry.getKey(), entry.getValue()))
+        .toList();
 
     return new QuestionsResponseDto(basicQuestions, specialQuestions);
   }
