@@ -24,5 +24,11 @@ public class ParticipationController {
     return new SuccessDto<>(emailList);
   }
 
+  @GetMapping("/info")
+  public SuccessDto<List<ParticipationInfo>> getParticipationInfo(@RequestParam Long challengeId) {
+    List<ParticipationInfo> responseDto = participationService.getParticipationInfo(challengeId);
+
+    return new SuccessDto<>(responseDto);
+  }
 
 }

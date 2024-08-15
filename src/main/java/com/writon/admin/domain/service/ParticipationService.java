@@ -41,4 +41,54 @@ public class ParticipationService {
     return emailList.stream().map(Email::getEmail).toList();
   }
 
+  public List<ParticipationInfo> getParticipationInfo(Long challengeId) {
+    // 1. 챌린지 조회
+    Challenge challenge = challengeRepository.findById(challengeId)
+        .orElseThrow(() -> new CustomException(ErrorCode.ETC_ERROR));
+
+    // 2. 유저 챌린지 조회
+    List<UserChallenge> userChallengeList = userChallengeRepository.findByChallengeId(challengeId)
+        .orElseThrow(() -> new CustomException(ErrorCode.ETC_ERROR));
+
+    // 3. 유저 정보 조회
+    List<ParticipationInfo> participationInfoList = new ArrayList<>();
+
+    for (UserChallenge userChallenge : userChallengeList) {
+      Affiliation affiliation = userChallenge.getAffiliation();
+      User user = affiliation.getUser();
+
+      List<UserChallenge> userChallenges = userChallengeRepository.findByAffiliationId(affiliation.getId())
+          .orElseThrow(() -> new CustomException(ErrorCode.ETC_ERROR));
+      String challenges = userChallenges.stream()
+          .map(entity -> entity.getChallenge().getName())
+          .collect(Collectors.joining(", "));
+
+      int smallTalkCnt = smallTalkRepository.countByUserChallengeId(userChallenge.getId());
+      int writingCnt = userTemplateRepository.countByUserChallengeId(userChallenge.getId());
+      int commentCnt = commentRepository.countByAffiliationId(affiliation.getId());
+
+      ParticipationInfo participationInfo = new ParticipationInfo(
+          affiliation.getNickname(),
+          userChallenges.size(),
+          challenges,
+          challenge.getStartAt(),
+          affiliation.getPosition(),
+          affiliation.getCompany(),
+          userChallenge.getCreatedAt(),
+          user.getBank(),
+          user.getAccountNumber(),
+          user.getEmail(),
+          userChallenge.getUserDeposit(),
+          writingCnt,
+          commentCnt,
+          smallTalkCnt,
+          affiliation.getPositionIntroduce()
+      );
+
+      participationInfoList.add(participationInfo);
+
+    }
+
+    return participationInfoList;
+  }
 }

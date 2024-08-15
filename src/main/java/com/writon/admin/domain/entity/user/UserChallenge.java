@@ -16,6 +16,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
+import org.springframework.data.annotation.CreatedDate;
 
 @Getter
 @Entity
@@ -46,7 +47,7 @@ public class UserChallenge {
   @Column(name = "cheering_phrase_date")
   private LocalDate cheeringPhraseDate;
 
-  @ManyToOne(fetch = FetchType.LAZY, optional = false)
+  @ManyToOne(fetch = FetchType.EAGER, optional = false)
   @OnDelete(action = OnDeleteAction.CASCADE)
   @JoinColumn(name = "challenge_id", nullable = false)
   private Challenge challenge;
@@ -55,5 +56,9 @@ public class UserChallenge {
   @OnDelete(action = OnDeleteAction.CASCADE)
   @JoinColumn(name = "affiliation_id", nullable = false)
   private Affiliation affiliation;
+
+  @CreatedDate
+  @Column(name = "created_at")
+  private LocalDate createdAt;
 
 }

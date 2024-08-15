@@ -8,5 +8,6 @@ import org.springframework.data.jpa.repository.JpaRepository;
 public interface UserChallengeRepository extends JpaRepository<UserChallenge, Long> {
 
   Optional<List<UserChallenge>> findByChallengeId(Long challengeId);
+  Optional<List<UserChallenge>> findByAffiliationId(Long affiliationId);
 
 }
