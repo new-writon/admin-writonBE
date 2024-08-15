@@ -35,8 +35,8 @@ public class Affiliation {
   @Column(name = "position", length = 20)
   private String position;
 
-  @Column(name = "position_intorduce", length = 300)
-  private String positionIntorduce;
+  @Column(name = "position_introduce", length = 300)
+  private String positionIntroduce;
 
   @Column(name = "nickname", nullable = false, length = 40)
   private String nickname;

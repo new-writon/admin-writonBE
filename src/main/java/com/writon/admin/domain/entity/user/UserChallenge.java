@@ -34,8 +34,8 @@ public class UserChallenge {
   @Column(name = "review", nullable = false)
   private Boolean review = false;
 
-  @Column(name = "ckeck_count", columnDefinition = "int UNSIGNED")
-  private Long ckeckCount;
+  @Column(name = "check_count", columnDefinition = "int UNSIGNED")
+  private Long checkCount;
 
   @Column(name = "re_engagement")
   private Boolean reEngagement;
