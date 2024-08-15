@@ -1,5 +1,6 @@
 package com.writon.admin.domain.controller;
 
+import com.writon.admin.domain.dto.request.challenge.ChallengeInfoRequestDto;
 import com.writon.admin.domain.dto.request.challenge.CreateChallengeRequestDto;
 import com.writon.admin.domain.dto.response.challenge.ChallengeInfoResponseDto;
 import com.writon.admin.domain.dto.response.challenge.CreateChallengeResponseDto;
@@ -11,6 +12,7 @@ import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -50,6 +52,16 @@ public class ChallengeController {
   @GetMapping("/info")
   public SuccessDto<ChallengeInfoResponseDto> getInfo(@RequestParam Long challengeId) {
     ChallengeInfoResponseDto responseDto = challengeService.getInfo(challengeId);
+
+    return new SuccessDto<>(responseDto);
+  }
+
+  @PutMapping("/info")
+  public SuccessDto<ChallengeInfoResponseDto> putInfo(
+      @RequestParam Long challengeId,
+      @RequestBody ChallengeInfoRequestDto requestDto
+  ) {
+    ChallengeInfoResponseDto responseDto = challengeService.putInfo(challengeId, requestDto);
 
     return new SuccessDto<>(responseDto);
   }

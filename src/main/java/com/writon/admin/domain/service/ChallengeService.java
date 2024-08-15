@@ -1,5 +1,6 @@
 package com.writon.admin.domain.service;
 
+import com.writon.admin.domain.dto.request.challenge.ChallengeInfoRequestDto;
 import com.writon.admin.domain.dto.request.challenge.CreateChallengeRequestDto;
 import com.writon.admin.domain.dto.response.challenge.ChallengeInfoResponseDto;
 import com.writon.admin.domain.dto.response.challenge.QuestionsResponseDto;
@@ -181,4 +182,53 @@ public class ChallengeService {
     );
   }
 
+  // ========== Put Info API ==========
+  public ChallengeInfoResponseDto putInfo(Long challengeId, ChallengeInfoRequestDto requestDto) {
+    // 1. 챌린지 기본 정보 조회
+    Challenge challenge = challengeRepository.findById(challengeId)
+        .orElseThrow(() -> new CustomException(ErrorCode.ETC_ERROR));
+
+    // 2. 챌린지 기본 정보 수정 및 저장
+    challenge.setName(requestDto.getName());
+    challenge.setStartAt(requestDto.getStartDate());
+    challenge.setFinishAt(requestDto.getEndDate());
+    Challenge editedChallenge = challengeRepository.save(challenge);
+
+    // 3. 챌린지 날짜 정보 조회
+    List<ChallengeDay> challengeDays = challengeDayRepository.findByChallengeId(challengeId)
+        .orElseThrow(() -> new CustomException(ErrorCode.ETC_ERROR));
+
+    // 4. 챌린지 날짜 정보 수정 및 저장
+    // 1) 새로운 날짜가 기존 리스트에 없으면 추가
+    for (LocalDate newDate : requestDto.getProcessDates()) {
+      boolean exists = challengeDays.stream()
+          .anyMatch(day -> day.getDay().equals(newDate));
+      if (!exists) {
+        ChallengeDay newDay = challengeDayRepository.save(new ChallengeDay(
+            newDate,
+            editedChallenge
+        ));
+      }
+    }
+
+    // 2) 기존 날짜가 새로운 리스트에 없으면 삭제
+    for (ChallengeDay existingDay : challengeDays) {
+      boolean stillExists = requestDto.getProcessDates().stream()
+          .anyMatch(date -> date.equals(existingDay.getDay()));
+      if (!stillExists) {
+        challengeDayRepository.delete(existingDay);
+      }
+    }
+
+    // 5. 변경된 날짜 정보 조회
+    List<ChallengeDay> editedChallengeDays = challengeDayRepository.findByChallengeId(challengeId)
+        .orElseThrow(() -> new CustomException(ErrorCode.ETC_ERROR));
+
+    return new ChallengeInfoResponseDto(
+        editedChallenge.getName(),
+        editedChallenge.getStartAt(),
+        editedChallenge.getFinishAt(),
+        editedChallengeDays.stream().map(ChallengeDay::getDay).collect(Collectors.toList())
+    );
+  }
 }
