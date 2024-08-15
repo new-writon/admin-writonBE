@@ -2,6 +2,7 @@ package com.writon.admin.domain.service;
 
 import com.writon.admin.domain.dto.request.challenge.ChallengeInfoRequestDto;
 import com.writon.admin.domain.dto.request.challenge.CreateChallengeRequestDto;
+import com.writon.admin.domain.dto.request.challenge.QuestionsRequestDto;
 import com.writon.admin.domain.dto.response.challenge.ChallengeInfoResponseDto;
 import com.writon.admin.domain.dto.response.challenge.QuestionsResponseDto;
 import com.writon.admin.domain.entity.lcoal.SpecialQuestion;
@@ -29,12 +30,10 @@ import com.writon.admin.global.error.CustomException;
 import com.writon.admin.global.error.ErrorCode;
 import java.time.LocalDate;
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
-import java.util.Optional;
 import java.util.stream.Collectors;
+import java.util.LinkedHashMap;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -180,6 +179,117 @@ public class ChallengeService {
         challenge.getFinishAt(),
         challengeDays.stream().map(ChallengeDay::getDay).collect(Collectors.toList())
     );
+  }
+
+  // ========== Put Questions API ==========
+  public QuestionsResponseDto putQuestions(Long challengeId, QuestionsRequestDto requestDto) {
+    // 1. 챌린지 조회
+    Challenge challenge = challengeRepository.findById(challengeId)
+        .orElseThrow(() -> new CustomException(ErrorCode.ETC_ERROR));
+
+    // 2. 질문 리스트 조회
+    List<Question> questionList = questionRepository.findByChallengeId(challengeId)
+        .orElseThrow(() -> new CustomException((ErrorCode.ETC_ERROR)));
+
+    // 3. 기존 BasicQuestion 중 입력값에 없는 질문들을 삭제
+    List<Question> basicQuestionsToDelete = questionList.stream()
+        .filter(question -> "베이직 질문".equals(question.getCategory()) &&
+            !requestDto.getBasicQuestions().contains(question.getQuestion()))
+        .toList();
+
+    questionRepository.deleteAll(basicQuestionsToDelete);
+
+    // 4. 새로 추가된 BasicQuestion 추가
+    for (String basicQuestion : requestDto.getBasicQuestions()) {
+      boolean exists = questionList.stream()
+          .anyMatch(question -> "베이직 질문".equals(question.getCategory()) &&
+              question.getQuestion().equals(basicQuestion));
+      if (!exists) {
+        questionRepository.save(
+            new Question(basicQuestion, "베이직 질문", challenge)
+        );
+      }
+    }
+
+    // 5. specialQuestion 처리
+    for (SpecialQuestion specialQuestion : requestDto.getSpecialQuestions()) {
+      String keyword = specialQuestion.getKeyword();
+      List<String> questions = specialQuestion.getQuestions();
+
+      // 기존 질문 리스트에서 현재 specialQuestion의 키워드에 해당하는 질문들을 필터링
+      List<Question> existingQuestions = questionList.stream()
+          .filter(question -> question.getKeyword() != null &&
+              keyword.equals(question.getKeyword().getKeyword()))
+          .toList();
+
+      // 기존 질문 리스트 중에서 specialQuestion에 없는 질문들은 삭제
+      List<Question> specialQuestionsToDelete = existingQuestions.stream()
+          .filter(question -> !questions.contains(question.getQuestion()))
+          .toList();
+      questionRepository.deleteAll(specialQuestionsToDelete);
+
+      // 새로 추가할 질문들 중 기존에 없는 질문들을 추가
+      for (String questionText : questions) {
+        boolean exists = existingQuestions.stream()
+            .anyMatch(question -> question.getQuestion().equals(questionText));
+        if (!exists) {
+          // 키워드가 없으면 추가
+          Keyword keywordEntity = keywordRepository.findByKeyword(keyword)
+              .orElseGet(() -> {
+                Keyword newKeyword = new Keyword(keyword);
+                keywordRepository.save(newKeyword);
+                return newKeyword;
+              });
+
+          questionRepository.save(
+              new Question(questionText, "스페셜 질문", challenge, keywordEntity)
+          );
+        }
+      }
+    }
+
+    // 6. questionList에서 specialQuestion에 없는 키워드의 질문들을 삭제
+    List<Question> specialQuestionsToDelete = questionList.stream()
+        .filter(question -> question.getKeyword() != null &&
+            requestDto.getSpecialQuestions().stream()
+                .noneMatch(specialQuestion -> specialQuestion.getKeyword()
+                    .equals(question.getKeyword().getKeyword())))
+        .toList();
+    questionRepository.deleteAll(specialQuestionsToDelete);
+
+    // 7. questionList에서 삭제된 질문들의 키워드를 제거
+    specialQuestionsToDelete.stream()
+        .map(Question::getKeyword)
+        .distinct()
+        .forEach(keyword -> {
+          if (questionRepository.countByKeyword(keyword) == 0) {
+            keywordRepository.delete(keyword);
+          }
+        });
+
+    // 8. 수정된 질문 리스트 다시 조회
+    List<Question> updatedQuestionList = questionRepository.findByChallengeId(challengeId)
+        .orElseThrow(() -> new CustomException(ErrorCode.ETC_ERROR));
+
+    // 9. 기본 질문과 스페셜 질문 분리 및 응답 생성
+    List<String> basicQuestions = updatedQuestionList.stream()
+        .filter(question -> "베이직 질문".equals(question.getCategory()))
+        .map(Question::getQuestion)
+        .toList();
+
+    List<SpecialQuestion> specialQuestions = updatedQuestionList.stream()
+        .filter(question -> question.getKeyword() != null)
+        .collect(Collectors.groupingBy(
+            question -> question.getKeyword().getKeyword(),
+            LinkedHashMap::new,  // 순서를 유지하기 위해 LinkedHashMap 사용
+            Collectors.mapping(Question::getQuestion, Collectors.toList())
+        ))
+        .entrySet().stream()
+        .map(entry -> new SpecialQuestion(entry.getKey(), entry.getValue()))
+        .toList();
+
+    // 10. QuestionsResponseDto 생성 후 반환
+    return new QuestionsResponseDto(basicQuestions, specialQuestions);
   }
 
   // ========== Put Info API ==========

@@ -2,6 +2,7 @@ package com.writon.admin.domain.controller;
 
 import com.writon.admin.domain.dto.request.challenge.ChallengeInfoRequestDto;
 import com.writon.admin.domain.dto.request.challenge.CreateChallengeRequestDto;
+import com.writon.admin.domain.dto.request.challenge.QuestionsRequestDto;
 import com.writon.admin.domain.dto.response.challenge.ChallengeInfoResponseDto;
 import com.writon.admin.domain.dto.response.challenge.CreateChallengeResponseDto;
 import com.writon.admin.domain.dto.response.challenge.QuestionsResponseDto;
@@ -52,6 +53,16 @@ public class ChallengeController {
   @GetMapping("/info")
   public SuccessDto<ChallengeInfoResponseDto> getInfo(@RequestParam Long challengeId) {
     ChallengeInfoResponseDto responseDto = challengeService.getInfo(challengeId);
+
+    return new SuccessDto<>(responseDto);
+  }
+
+  @PutMapping("/questions")
+  public SuccessDto<QuestionsResponseDto> putQuestions(
+      @RequestParam Long challengeId,
+      @RequestBody QuestionsRequestDto requestDto
+  ) {
+    QuestionsResponseDto responseDto = challengeService.putQuestions(challengeId, requestDto);
 
     return new SuccessDto<>(responseDto);
   }
