@@ -85,6 +85,7 @@ public class AuthService {
         organization.isPresent(),
         organization.map(Organization::getId).orElse(null),
         organization.map(Organization::getName).orElse(null),
+        organization.map(Organization::getThemeColor).orElse(null),
         organization.map(Organization::getLogo).orElse(null)
     );
   }
