@@ -33,12 +33,21 @@ public class OrganizationController {
     CreateOrganizationResponseDto createOrganizationResponseDto
         = organizationService.createOrganization(createOrganizationRequestDto, logoUrl);
 
-    return new SuccessDto<>(new CreateResponseDto(
+    return new SuccessDto<>(createOrganizationResponseDto);
   }
 
   @GetMapping("/position")
   public SuccessDto<List<String>> getPositions() {
     return new SuccessDto<>(organizationService.getPositions());
+  }
+
+  @PatchMapping("/position")
+  public SuccessDto<List<String>> editPositions(
+      @RequestBody List<String> positionList
+  ) {
+    List<String> savedPositionList = organizationService.editPositions(positionList);
+
+    return new SuccessDto<>(savedPositionList);
   }
 
 }

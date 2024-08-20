@@ -87,10 +87,38 @@ public class OrganizationService {
       );
     } catch (IOException e) {
       throw new CustomException(ErrorCode.BAD_REQUEST);
+  // ========== EditPositions API ==========
+  public List<String> editPositions(List<String> positionList) {
+    Organization organization = tokenUtil.getOrganization();
+
+    // 1. 현재 조직의 모든 Position을 조회
+    List<Position> existingPositions = positionRepository.findByOrganizationId(organization.getId())
+        .orElseThrow(() -> new CustomException(ErrorCode.ETC_ERROR));
+
+    // 2. 기존의 position names 리스트를 생성
+    List<String> existingPositionNames = existingPositions.stream()
+        .map(Position::getName)
+        .toList();
+
+    // 3. 새로운 position names 중에서 기존에 없으면 추가
+    for (String newPositionName : positionList) {
+      if (!existingPositionNames.contains(newPositionName)) {
+        Position newPosition = new Position();
+        newPosition.setName(newPositionName);
+        newPosition.setOrganization(organization);
+
+        positionRepository.save(newPosition);
+      }
     }
 
-    // 3. Image Url 제공
-    return amazonS3Client.getUrl(bucket, fileName).toString();
+    // 4. 기존의 position names 중에서 새로운 리스트에 없으면 삭제
+    for (Position existingPosition : existingPositions) {
+      if (!positionList.contains(existingPosition.getName())) {
+        positionRepository.delete(existingPosition);
+      }
+    }
 
+    return getPositions();
   }
+
 }
