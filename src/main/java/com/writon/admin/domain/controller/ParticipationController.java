@@ -6,6 +6,8 @@ import com.writon.admin.global.response.SuccessDto;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
@@ -31,4 +33,16 @@ public class ParticipationController {
     return new SuccessDto<>(responseDto);
   }
 
+  @PostMapping("/withdrawal")
+  public SuccessDto<List<ParticipationInfo>> withdrawal(
+      @RequestParam Long challengeId,
+      @RequestBody List<Long> userChallengeIdList
+  ) {
+    List<ParticipationInfo> responseDto = participationService.withdrawal(
+        challengeId,
+        userChallengeIdList
+    );
+
+    return new SuccessDto<>(responseDto);
+  }
 }

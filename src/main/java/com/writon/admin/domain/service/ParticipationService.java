@@ -33,6 +33,7 @@ public class ParticipationService {
   private final ChallengeDayRepository challengeDayRepository;
   private final ChallengeRepository challengeRepository;
 
+  // ========== Get Email API ==========
   public List<String> getEmailList(Long challengeId) {
 
     List<Email> emailList = emailRepository.findByChallengeId(challengeId)
@@ -41,6 +42,7 @@ public class ParticipationService {
     return emailList.stream().map(Email::getEmail).toList();
   }
 
+  // ========== Get ParticipationInfo API ==========
   public List<ParticipationInfo> getParticipationInfo(Long challengeId) {
     // 1. 챌린지 조회
     Challenge challenge = challengeRepository.findById(challengeId)
@@ -68,6 +70,8 @@ public class ParticipationService {
       int commentCnt = commentRepository.countByAffiliationId(affiliation.getId());
 
       ParticipationInfo participationInfo = new ParticipationInfo(
+          userChallenge.getId(),
+          userChallenge.getWithdrawn(),
           affiliation.getNickname(),
           userChallenges.size(),
           challenges,
@@ -91,4 +95,19 @@ public class ParticipationService {
 
     return participationInfoList;
   }
+
+  // ========== Post Withdrawal API ==========
+  public List<ParticipationInfo> withdrawal(Long challengeId, List<Long> userChallengeIdList) {
+
+    for (Long userChallengeId : userChallengeIdList) {
+      UserChallenge userChallenge = userChallengeRepository.findById(userChallengeId)
+          .orElseThrow(() -> new CustomException(ErrorCode.ETC_ERROR));
+
+      userChallenge.setWithdrawn(true);
+      userChallengeRepository.save(userChallenge);
+    }
+
+    return getParticipationInfo(challengeId);
+  }
+
 }
