@@ -1,9 +1,9 @@
 package com.writon.admin.domain.service;
 
 import com.writon.admin.domain.dto.request.organization.CreateOrganizationRequestDto;
-import com.amazonaws.services.s3.model.CannedAccessControlList;
+import com.writon.admin.domain.dto.request.organization.EditOrganizationRequestDto;
 import com.writon.admin.domain.dto.response.organization.CreateOrganizationResponseDto;
-import com.amazonaws.services.s3.model.PutObjectRequest;
+import com.writon.admin.domain.dto.response.organization.EditOrganizationResponseDto;
 import com.writon.admin.domain.entity.organization.AdminUser;
 import com.writon.admin.domain.entity.organization.Organization;
 import com.writon.admin.domain.entity.organization.Position;
@@ -13,13 +13,9 @@ import com.writon.admin.domain.repository.organization.PositionRepository;
 import com.writon.admin.domain.util.TokenUtil;
 import com.writon.admin.global.error.CustomException;
 import com.writon.admin.global.error.ErrorCode;
-import java.io.IOException;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
-import org.springframework.web.multipart.MultipartFile;
 
 @Service
 @RequiredArgsConstructor
@@ -27,9 +23,8 @@ public class OrganizationService {
 
   private final OrganizationRepository organizationRepository;
   private final AdminUserRepository adminUserRepository;
-  private final AmazonS3 amazonS3Client;
   private final TokenUtil tokenUtil;
-
+  private final PositionRepository positionRepository;
 
   // ========== CreateOrganization API ==========
   public CreateOrganizationResponseDto createOrganization(
@@ -75,18 +70,28 @@ public class OrganizationService {
         .map(Position::getName)
         .toList();
   }
-    metadata.setSSEAlgorithm(ObjectMetadata.AES_256_SERVER_SIDE_ENCRYPTION);
 
-    String fileName = file.getOriginalFilename();
 
-    // 2. Amazon S3에 이미지 등록
-    try {
-      amazonS3Client.putObject(
-          new PutObjectRequest(bucket, fileName, file.getInputStream(), metadata)
-              .withCannedAcl(CannedAccessControlList.PublicRead)
-      );
-    } catch (IOException e) {
-      throw new CustomException(ErrorCode.BAD_REQUEST);
+  // ========== EditOrganization API ==========
+  public EditOrganizationResponseDto editOrganization(
+      EditOrganizationRequestDto requestDto,
+      String logoUrl
+  ) {
+    Organization organization = tokenUtil.getOrganization();
+
+    organization.setName(requestDto.getName());
+    organization.setThemeColor(requestDto.getThemeColor());
+    organization.setLogo(logoUrl);
+
+    Organization savedOrganization = organizationRepository.save(organization);
+
+    return new EditOrganizationResponseDto(
+        savedOrganization.getName(),
+        savedOrganization.getThemeColor(),
+        savedOrganization.getLogo()
+    );
+  }
+
   // ========== EditPositions API ==========
   public List<String> editPositions(List<String> positionList) {
     Organization organization = tokenUtil.getOrganization();
