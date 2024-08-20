@@ -13,6 +13,7 @@ public class LoginResponseDto {
   private boolean hasOrganization;
   private Long organizationId; // nullable
   private String organizationName; // nullable
+  private String themeColor; // nullable
   private String organizationLogo; // nullable
 
 }

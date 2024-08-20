@@ -5,10 +5,11 @@ import lombok.Getter;
 
 @Getter
 @AllArgsConstructor
-public class CreateResponseDto {
+public class CreateOrganizationResponseDto {
 
   private Long organizationId;
   private String organizationName;
+  private String themeColor;
   private String organizationLogo; // nullable
 
 }

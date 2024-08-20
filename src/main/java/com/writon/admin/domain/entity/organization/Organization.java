@@ -20,6 +20,7 @@ import org.hibernate.annotations.OnDeleteAction;
 @Entity
 @Table(name = "organizations")
 @Getter
+@Setter
 @NoArgsConstructor
 public class Organization {
 
