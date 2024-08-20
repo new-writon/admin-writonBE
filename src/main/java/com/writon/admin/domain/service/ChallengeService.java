@@ -64,7 +64,7 @@ public class ChallengeService {
     ));
 
     // 3. 챌린지 날짜정보 저장
-    for (LocalDate date : requestDto.getDates()) {
+    for (LocalDate date : requestDto.getProcessDates()) {
       challengeDayRepository.save(new ChallengeDay(date, challenge));
     }
 
