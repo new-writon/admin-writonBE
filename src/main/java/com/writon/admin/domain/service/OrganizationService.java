@@ -1,11 +1,9 @@
 package com.writon.admin.domain.service;
 
-import com.amazonaws.services.s3.AmazonS3;
+import com.writon.admin.domain.dto.request.organization.CreateOrganizationRequestDto;
 import com.amazonaws.services.s3.model.CannedAccessControlList;
-import com.amazonaws.services.s3.model.ObjectMetadata;
+import com.writon.admin.domain.dto.response.organization.CreateOrganizationResponseDto;
 import com.amazonaws.services.s3.model.PutObjectRequest;
-import com.writon.admin.domain.dto.request.organization.CreateRequestDto;
-import com.writon.admin.domain.dto.response.organization.CreateResponseDto;
 import com.writon.admin.domain.entity.organization.AdminUser;
 import com.writon.admin.domain.entity.organization.Organization;
 import com.writon.admin.domain.entity.organization.Position;
@@ -33,8 +31,11 @@ public class OrganizationService {
   private final TokenUtil tokenUtil;
 
 
-  // ========== Create API ==========
-  public CreateResponseDto create(CreateRequestDto createRequestDto) {
+  // ========== CreateOrganization API ==========
+  public CreateOrganizationResponseDto createOrganization(
+      CreateOrganizationRequestDto createOrganizationRequestDto,
+      String logoUrl
+  ) {
     // 1. 사용자 정보 불러오기
     AdminUser adminUser = tokenUtil.getAdminUser();
 
@@ -50,12 +51,12 @@ public class OrganizationService {
     Organization savedOrganization = organizationRepository.save(organization);
 
     // 4. Position 저장
-    for (String position : createRequestDto.getPositions()) {
+    for (String position : createOrganizationRequestDto.getPositions()) {
       Position positionEntity = new Position(position, organization);
       positionRepository.save(positionEntity);
     }
 
-    return new CreateResponseDto(
+    return new CreateOrganizationResponseDto(
         savedOrganization.getId(),
         savedOrganization.getName(),
         savedOrganization.getLogo()

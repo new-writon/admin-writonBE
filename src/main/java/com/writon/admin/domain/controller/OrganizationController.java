@@ -1,7 +1,8 @@
 package com.writon.admin.domain.controller;
 
-import com.writon.admin.domain.dto.request.organization.CreateRequestDto;
-import com.writon.admin.domain.dto.response.organization.CreateResponseDto;
+import com.writon.admin.domain.dto.request.organization.CreateOrganizationRequestDto;
+import com.writon.admin.domain.dto.request.organization.EditOrganizationRequestDto;
+import com.writon.admin.domain.dto.response.organization.CreateOrganizationResponseDto;
 import com.writon.admin.domain.service.OrganizationService;
 import com.writon.admin.global.response.SuccessDto;
 import lombok.RequiredArgsConstructor;
@@ -19,9 +20,9 @@ public class OrganizationController {
   private final OrganizationService organizationService;
 
   @PostMapping
-  public SuccessDto<CreateResponseDto> create(
+  public SuccessDto<CreateOrganizationResponseDto> createOrganization(
       @RequestPart(required = false) MultipartFile file,
-      @RequestPart CreateRequestDto createRequestDto
+      @RequestPart CreateOrganizationRequestDto createOrganizationRequestDto
   ) {
 
     String logoUrl = null;
@@ -29,7 +30,8 @@ public class OrganizationController {
       logoUrl = organizationService.uploadLogo(file);
     }
 
-    CreateResponseDto createResponseDto = organizationService.create(createRequestDto);
+    CreateOrganizationResponseDto createOrganizationResponseDto
+        = organizationService.createOrganization(createOrganizationRequestDto, logoUrl);
 
     return new SuccessDto<>(new CreateResponseDto(
         createResponseDto.getOrganizationId(),
