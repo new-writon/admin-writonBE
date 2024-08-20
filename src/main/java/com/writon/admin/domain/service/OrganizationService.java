@@ -41,9 +41,9 @@ public class OrganizationService {
 
     // 2. Organization 객체 생성
     Organization organization = new Organization(
-        createRequestDto.getName(),
-        null,
-        createRequestDto.getThemeColor(),
+        createOrganizationRequestDto.getName(),
+        logoUrl,
+        createOrganizationRequestDto.getThemeColor(),
         adminUser
     );
 
@@ -59,21 +59,22 @@ public class OrganizationService {
     return new CreateOrganizationResponseDto(
         savedOrganization.getId(),
         savedOrganization.getName(),
+        savedOrganization.getThemeColor(),
         savedOrganization.getLogo()
     );
   }
 
-  // ========== Upload API ==========
-  @Value("${cloud.aws.s3.bucket}")
-  private String bucket;
-  private final PositionRepository positionRepository;
+  // ========== GetPositions API ==========
+  public List<String> getPositions() {
+    Organization organization = tokenUtil.getOrganization();
 
-  public String uploadLogo(MultipartFile file) {
+    List<Position> responseDto = positionRepository.findByOrganizationId(organization.getId())
+        .orElseThrow(() -> new CustomException(ErrorCode.ETC_ERROR));
 
-    // 1. metadata 생성
-    ObjectMetadata metadata = new ObjectMetadata();
-    metadata.setContentLength(file.getSize());
-    metadata.setContentType(file.getContentType());
+    return responseDto.stream()
+        .map(Position::getName)
+        .toList();
+  }
     metadata.setSSEAlgorithm(ObjectMetadata.AES_256_SERVER_SIDE_ENCRYPTION);
 
     String fileName = file.getOriginalFilename();

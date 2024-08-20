@@ -34,11 +34,11 @@ public class OrganizationController {
         = organizationService.createOrganization(createOrganizationRequestDto, logoUrl);
 
     return new SuccessDto<>(new CreateResponseDto(
-        createResponseDto.getOrganizationId(),
-        createResponseDto.getOrganizationName(),
-        logoUrl
-    )
-    );
+  }
+
+  @GetMapping("/position")
+  public SuccessDto<List<String>> getPositions() {
+    return new SuccessDto<>(organizationService.getPositions());
   }
 
 }
