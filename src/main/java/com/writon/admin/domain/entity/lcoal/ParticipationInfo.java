@@ -8,6 +8,8 @@ import lombok.Getter;
 @AllArgsConstructor
 public class ParticipationInfo {
 
+  private Long id;
+  private Boolean withdrawn;
   private String nickname;
   private int challengeCnt;
   private String challenges;

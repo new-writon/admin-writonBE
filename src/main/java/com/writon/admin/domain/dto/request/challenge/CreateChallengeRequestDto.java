@@ -13,7 +13,7 @@ public class CreateChallengeRequestDto {
   private String name;
   private LocalDate startDate;
   private LocalDate endDate;
-  private List<LocalDate> dates;
+  private List<LocalDate> processDates;
   private List<String> basicQuestions;
   private List<SpecialQuestion> specialQuestions;
   private List<String> emailList;

@@ -19,6 +19,7 @@ import org.hibernate.annotations.OnDeleteAction;
 import org.springframework.data.annotation.CreatedDate;
 
 @Getter
+@Setter
 @Entity
 @Table(name = "user_challenges")
 @NoArgsConstructor
@@ -46,6 +47,9 @@ public class UserChallenge {
 
   @Column(name = "cheering_phrase_date")
   private LocalDate cheeringPhraseDate;
+
+  @Column(name = "withdrawn")
+  private Boolean withdrawn;
 
   @ManyToOne(fetch = FetchType.EAGER, optional = false)
   @OnDelete(action = OnDeleteAction.CASCADE)
