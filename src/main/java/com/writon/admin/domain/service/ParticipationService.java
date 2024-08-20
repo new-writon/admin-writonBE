@@ -32,6 +32,7 @@ public class ParticipationService {
   private final CommentRepository commentRepository;
   private final ChallengeDayRepository challengeDayRepository;
   private final ChallengeRepository challengeRepository;
+  private final EmailService emailService;
 
   // ========== Get Email API ==========
   public List<String> getEmailList(Long challengeId) {
@@ -110,4 +111,19 @@ public class ParticipationService {
     return getParticipationInfo(challengeId);
   }
 
+  // ========== Post Participate API ==========
+  public List<String> participate(Long challengeId, List<String> emailList) {
+    Challenge challenge = challengeRepository.findById(challengeId)
+        .orElseThrow(() -> new CustomException(ErrorCode.ETC_ERROR));
+
+    for (String email : emailList) {
+      emailService.sendEmail(challenge, email);
+      emailRepository.save(new Email(email, challenge));
+    }
+
+    List<Email> sendedEmailList = emailRepository.findByChallengeId(challengeId)
+        .orElseThrow(() -> new CustomException(ErrorCode.ETC_ERROR));
+
+    return sendedEmailList.stream().map(Email::getEmail).toList();
+  }
 }

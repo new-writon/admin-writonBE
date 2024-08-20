@@ -43,6 +43,11 @@ dependencies {
 	implementation 'io.awspring.cloud:spring-cloud-aws-s3:3.1.0'
 	implementation 'javax.xml.bind:jaxb-api:2.3.1'
 
+	// mail
+	implementation 'org.springframework.boot:spring-boot-starter-mail'
+	implementation 'org.springframework.boot:spring-boot-starter-thymeleaf' // option
+	implementation 'nz.net.ultraq.thymeleaf:thymeleaf-layout-dialect' // option
+
 	// lombok
 	implementation 'org.projectlombok:lombok'
 	annotationProcessor 'org.projectlombok:lombok'
