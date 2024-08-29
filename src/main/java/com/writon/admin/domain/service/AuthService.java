@@ -6,9 +6,12 @@ import com.writon.admin.domain.dto.request.auth.ReissueRequestDto;
 import com.writon.admin.domain.dto.response.auth.LoginResponseDto;
 import com.writon.admin.domain.dto.response.auth.ReissueResponseDto;
 import com.writon.admin.domain.dto.response.auth.SignUpResponseDto;
+import com.writon.admin.domain.entity.challenge.Challenge;
+import com.writon.admin.domain.entity.lcoal.ChallengeResponse;
 import com.writon.admin.domain.entity.organization.AdminUser;
 import com.writon.admin.domain.entity.organization.Organization;
 import com.writon.admin.domain.entity.token.RefreshToken;
+import com.writon.admin.domain.repository.challenge.ChallengeRepository;
 import com.writon.admin.domain.repository.organization.AdminUserRepository;
 import com.writon.admin.domain.repository.organization.OrganizationRepository;
 import com.writon.admin.domain.repository.token.RefreshTokenRepository;
@@ -16,7 +19,10 @@ import com.writon.admin.global.config.auth.TokenDto;
 import com.writon.admin.global.config.auth.TokenProvider;
 import com.writon.admin.global.error.CustomException;
 import com.writon.admin.global.error.ErrorCode;
+import java.util.Collections;
+import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
@@ -37,6 +43,7 @@ public class AuthService {
   private final AuthenticationManagerBuilder authenticationManagerBuilder;
   private final RefreshTokenRepository refreshTokenRepository;
   private final TokenProvider tokenProvider;
+  private final ChallengeRepository challengeRepository;
 
 
   // ========== SignUp API ==========
@@ -56,14 +63,17 @@ public class AuthService {
 
     // 1. Login ID/PW 를 기반으로 AuthenticationToken 생성
     UsernamePasswordAuthenticationToken authenticationToken = loginRequestDto.toAuthentication();
+    System.out.println("1 실행");
 
     // 2. 실제로 검증 (사용자 비밀번호 체크) 이 이루어지는 부분
     // authenticate 메서드가 실행이 될 때 CustomUserDetailsService 에서 만들었던 loadUserByUsername 메서드가 실행됨
     Authentication authentication = authenticationManagerBuilder.getObject()
         .authenticate(authenticationToken);
+    System.out.println("2 실행");
 
     // 3. 인증 정보를 기반으로 JWT 토큰 생성
     TokenDto tokenDto = tokenProvider.createToken(authentication);
+    System.out.println("3 실행");
 
     // 4. RefreshToken 저장
     RefreshToken refreshToken = RefreshToken.builder()
@@ -78,7 +88,17 @@ public class AuthService {
         .orElseThrow(() -> new UsernameNotFoundException(" -> 데이터베이스에서 찾을 수 없습니다."));
     Optional<Organization> organization = organizationRepository.findByAdminUserId(adminUser.getId());
 
-    // 6. Response 전달
+    // 7. 챌린지 정보 가져오기
+    List<Challenge> challenges = Collections.emptyList();
+    if (organization.isPresent()) {
+      challenges = challengeRepository.findByOrganizationId(organization.get().getId())
+          .orElse(Collections.emptyList()); // 데이터가 없을 때 빈 리스트 반환
+    }
+    List<ChallengeResponse> challengeList = challenges.stream()
+        .map(entity -> new ChallengeResponse(entity.getId(), entity.getName()))
+        .toList();
+
+    // 8. Response 전달
     return new LoginResponseDto(
         tokenDto.getAccessToken(),
         tokenDto.getRefreshToken(),
@@ -86,7 +106,8 @@ public class AuthService {
         organization.map(Organization::getId).orElse(null),
         organization.map(Organization::getName).orElse(null),
         organization.map(Organization::getThemeColor).orElse(null),
-        organization.map(Organization::getLogo).orElse(null)
+        organization.map(Organization::getLogo).orElse(null),
+        challengeList
     );
   }
 
