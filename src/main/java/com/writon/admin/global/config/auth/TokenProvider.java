@@ -33,7 +33,7 @@ public class TokenProvider {
 
   private final Key key;
 
-  public TokenProvider(@Value("${JWT_SECRET_KEY}") String secret) {
+  public TokenProvider(@Value("${jwt.secret}") String secret) {
     // 빈이 생성되고 주입을 받은 후에 secret값을 Base64 Decode해서 key 변수에 할당하기 위해
     byte[] keyBytes = Decoders.BASE64.decode(secret);
     this.key = Keys.hmacShaKeyFor(keyBytes);
