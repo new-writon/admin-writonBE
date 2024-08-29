@@ -8,6 +8,7 @@ import com.writon.admin.domain.service.ImageService;
 import com.writon.admin.domain.service.OrganizationService;
 import com.writon.admin.global.response.SuccessDto;
 import java.util.List;
+import java.util.Objects;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
@@ -56,14 +57,14 @@ public class OrganizationController {
 
     // 로고를 그대로 유지하는 경우에는 requestDto에 logo 추가, file은 null
     String logoUrl = editOrganizationRequestDto.getLogo();
-    System.out.println(file + logoUrl);
+
     if (file != null && !file.isEmpty()) {
       imageService.deleteImage();
       logoUrl = imageService.uploadImage(file);
     }
 
     // 로고를 삭제하고자 하는 경우에는 requestDto logo를 null로 전송, file도 null
-    if (file == null && logoUrl == null) {
+    if (file == null && Objects.equals(logoUrl, "")) {
       System.out.println("로고 삭제 실행");
       imageService.deleteImage();
     }

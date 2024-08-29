@@ -9,5 +9,5 @@ import lombok.Getter;
 @AllArgsConstructor
 public class CreateChallengeResponseDto {
 
-  private List<ChallengeResponse> challengeResponseList;
+  private List<ChallengeResponse> challengeList;
 }

@@ -49,6 +49,7 @@ public class ChallengeService {
   private final TokenUtil tokenUtil;
   private final UserChallengeRepository userChallengeRepository;
   private final UserTemplateRepository userTemplateRepository;
+  private final EmailService emailService;
 
   // ========== Create API ==========
   public CreateChallengeResponseDto createChallenge(CreateChallengeRequestDto requestDto) {
@@ -84,13 +85,15 @@ public class ChallengeService {
       }
     }
 
-    // 5. 이메일정보 저장
+    // 5. 이메일 전송 & 정보 저장
     for (String email : requestDto.getEmailList()) {
+      emailService.sendEmail(challenge, email);
       emailRepository.save(new Email(email, challenge));
     }
 
     // 6. Response 생성
-    List<Challenge> challenges = challengeRepository.findByOrganizationId(organization.getId());
+    List<Challenge> challenges = challengeRepository.findByOrganizationId(organization.getId())
+        .orElseThrow(() -> new CustomException(ErrorCode.CHALLENGE_NOT_FOUND));
     List<ChallengeResponse> challengeList = challenges.stream()
         .map(entity -> new ChallengeResponse(entity.getId(), entity.getName()))
         .collect(Collectors.toList());

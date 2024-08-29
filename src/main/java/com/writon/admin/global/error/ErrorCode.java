@@ -1,5 +1,6 @@
 package com.writon.admin.global.error;
 
+import com.writon.admin.domain.entity.organization.Organization;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -8,14 +9,6 @@ import org.springframework.http.HttpStatus;
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
 @Getter
 public enum ErrorCode {
-
-  // user
-  USER_NOT_FOUND(HttpStatus.NOT_FOUND, "U01", "사용자를 찾을 수 없습니다"),
-
-  // book
-  BOOK_NOT_FOUND(HttpStatus.NOT_FOUND, "B01", "책을 찾을 수 없습니다"),
-  BOOK_ALREADY_LOANED(HttpStatus.BAD_REQUEST, "B02", "현재 대여중인 책입니다"),
-  BOOK_NOT_LOANED(HttpStatus.BAD_REQUEST, "B03", "이미 반납된 책입니다"),
 
   // error
   BAD_REQUEST(HttpStatus.BAD_REQUEST, "400", "잘못된 요청입니다"), // 400 Bad Request
@@ -28,8 +21,15 @@ public enum ErrorCode {
 
 
   // auth
+  USER_NOT_FOUND(HttpStatus.NOT_FOUND, "A01", "사용자를 찾을 수 없습니다"),
+  TOKEN_ERROR(HttpStatus.BAD_REQUEST, "A02", "만료된 토큰입니다."),
   LOGOUT_USER(HttpStatus.NOT_FOUND, "410", "로그아웃한 유저입니다."),
-  TOKEN_ERROR(HttpStatus.BAD_REQUEST, "411", "잘못된 토큰입니다.");
+
+  // organization
+  ORGANIZATION_NOT_FOUND(HttpStatus.NOT_FOUND, "O01", "조직 정보를 찾을 수 없습니다"),
+
+  // challenge
+  CHALLENGE_NOT_FOUND(HttpStatus.NOT_FOUND, "C01", "챌린지 정보를 찾을 수 없습니다");
 
   private final HttpStatus httpStatus;
   private final String code;

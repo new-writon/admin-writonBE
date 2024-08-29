@@ -1,6 +1,6 @@
 FROM amazoncorretto:17-alpine-jdk
 
-ARG JAR_FILE=build/libs/writon-admin-0.0.1.jar
+ARG JAR_FILE=build/libs/admin-0.0.1-SNAPSHOT.jar
 
 ADD ${JAR_FILE} writon-admin.jar
 
