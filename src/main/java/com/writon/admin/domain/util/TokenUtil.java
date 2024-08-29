@@ -21,7 +21,7 @@ public class TokenUtil {
   public AdminUser getAdminUser() {
     Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
     AdminUser adminUser = adminUserRepository.findByIdentifier(authentication.getName())
-        .orElseThrow(() -> new CustomException(ErrorCode.TOKEN_ERROR));
+        .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
 
     return adminUser;
   }
@@ -29,7 +29,7 @@ public class TokenUtil {
   public Organization getOrganization() {
     AdminUser adminUser = getAdminUser();
     Organization organization = organizationRepository.findByAdminUserId(adminUser.getId())
-        .orElseThrow(() -> new CustomException(ErrorCode.ETC_ERROR));
+        .orElseThrow(() -> new CustomException(ErrorCode.ORGANIZATION_NOT_FOUND));
 
     return organization;
   }
