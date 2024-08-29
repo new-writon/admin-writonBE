@@ -48,7 +48,6 @@ jobs:
       - name: Set .yml for main
         run: |
           # main 설정 파일 디렉토리로 이동
-          mkdir ./src/main/resources
           cd ./src/main/resources
           touch ./application.yml
           echo "${{ secrets.PROPERTIES_YML }}" > ./application.yml
