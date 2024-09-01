@@ -56,11 +56,18 @@ public class Challenge {
   @JoinColumn(name = "organization_id", nullable = false)
   private Organization organization;
 
-  public Challenge(String name, LocalDate startAt, LocalDate finishAt, Organization organization) {
+  public Challenge(
+      String name,
+      LocalDate startAt,
+      LocalDate finishAt,
+      Organization organization,
+      Long deposit
+  ) {
     this.name = name;
     this.startAt = startAt;
     this.finishAt = finishAt;
     this.organization = organization;
+    this.deposit = deposit;
   }
 
 }

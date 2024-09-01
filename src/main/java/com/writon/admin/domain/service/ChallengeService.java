@@ -61,7 +61,8 @@ public class ChallengeService {
         requestDto.getName(),
         requestDto.getStartDate(),
         requestDto.getEndDate(),
-        organization
+        organization,
+        0L
     ));
 
     // 3. 챌린지 날짜정보 저장
