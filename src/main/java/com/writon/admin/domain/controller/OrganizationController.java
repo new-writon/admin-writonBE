@@ -4,8 +4,10 @@ import com.writon.admin.domain.dto.request.organization.CreateOrganizationReques
 import com.writon.admin.domain.dto.request.organization.EditOrganizationRequestDto;
 import com.writon.admin.domain.dto.response.organization.CreateOrganizationResponseDto;
 import com.writon.admin.domain.dto.response.organization.EditOrganizationResponseDto;
+import com.writon.admin.domain.entity.organization.Organization;
 import com.writon.admin.domain.service.ImageService;
 import com.writon.admin.domain.service.OrganizationService;
+import com.writon.admin.domain.util.TokenUtil;
 import com.writon.admin.global.response.SuccessDto;
 import java.util.List;
 import java.util.Objects;
@@ -26,6 +28,9 @@ public class OrganizationController {
 
   private final OrganizationService organizationService;
   private final ImageService imageService;
+  private final TokenUtil tokenUtil;
+
+  private static final String DEFAULT_LOGO_URL = "https://writon-data.s3.ap-northeast-2.amazonaws.com/logo/default-logo.png";
 
   @PostMapping
   public SuccessDto<CreateOrganizationResponseDto> createOrganization(
@@ -54,19 +59,18 @@ public class OrganizationController {
       @RequestPart(required = false) MultipartFile file,
       @RequestPart EditOrganizationRequestDto editOrganizationRequestDto
   ) {
-
-    // 로고를 그대로 유지하는 경우에는 requestDto에 logo 추가, file은 null
     String logoUrl = editOrganizationRequestDto.getLogo();
 
+    // 로고를 그대로 유지하는 경우에는 requestDto에 logo 추가, file은 null
     if (file != null && !file.isEmpty()) {
-      imageService.deleteImage();
+      deleteImage();
       logoUrl = imageService.uploadImage(file);
     }
 
     // 로고를 삭제하고자 하는 경우에는 requestDto logo를 null로 전송, file도 null
-    if (file == null && Objects.equals(logoUrl, "")) {
-      System.out.println("로고 삭제 실행");
-      imageService.deleteImage();
+    if (file == null &&
+        (Objects.equals(logoUrl, "") || Objects.equals(logoUrl, DEFAULT_LOGO_URL))) {
+      deleteImage();
     }
 
     EditOrganizationResponseDto editOrganizationResponseDto
@@ -84,6 +88,18 @@ public class OrganizationController {
     return new SuccessDto<>(savedPositionList);
   }
 
+  private void deleteImage() {
+    Organization organization = tokenUtil.getOrganization();
+    String imageUrl = organization.getLogo();
+    System.out.println("deleteImage 함수 실행" + imageUrl);
+
+    if (!Objects.equals(imageUrl, "") &&
+        !Objects.equals(imageUrl, DEFAULT_LOGO_URL)) {
+      imageService.deleteImage(imageUrl);
+      System.out.println("deleteImage 실행" + imageUrl);
+
+    }
+  }
 }
 
 

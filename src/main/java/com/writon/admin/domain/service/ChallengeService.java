@@ -108,6 +108,10 @@ public class ChallengeService {
     List<ChallengeDay> challengeDayList = challengeDayRepository.findByChallengeId(challengeId)
         .orElseThrow(() -> new CustomException(ErrorCode.ETC_ERROR));
 
+    challengeDayList = challengeDayList.stream()
+        .sorted(Comparator.comparing(ChallengeDay::getDay))
+        .toList();
+
     // 2. 챌린지 참여 유저 리스트 추출
     List<UserChallenge> userChallengeList = userChallengeRepository.findByChallengeId(challengeId)
         .orElseThrow(() -> new CustomException(ErrorCode.ETC_ERROR));
