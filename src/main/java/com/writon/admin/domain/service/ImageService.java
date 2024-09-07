@@ -33,7 +33,7 @@ public class ImageService {
     metadata.setContentType(file.getContentType());
     metadata.setSSEAlgorithm(ObjectMetadata.AES_256_SERVER_SIDE_ENCRYPTION);
 
-    String fileName = file.getOriginalFilename();
+    String fileName = "logo/" + file.getOriginalFilename();
 
     // 2. Amazon S3에 이미지 등록
     try {
@@ -51,11 +51,8 @@ public class ImageService {
   }
 
   // ========== DeleteImage API ==========
-  public void deleteImage() {
-    Organization organization = tokenUtil.getOrganization();
+  public void deleteImage(String imageUrl) {
     String splitStr = ".com/";
-    String imageUrl = organization.getLogo();
-    System.out.println(imageUrl);
 
     if (imageUrl != null) {
       String key = imageUrl.substring(imageUrl.lastIndexOf(splitStr) + splitStr.length());
