@@ -106,32 +106,22 @@ public class AuthService {
 
   // ========== Reissue API ==========
   public ReissueResponseDto reissue(ReissueRequestDto reissueRequestDto) {
-    // 1. Refresh Token 검증
-    if (!tokenProvider.validateToken(reissueRequestDto.getRefreshToken())) {
-      throw new RuntimeException("Refresh Token 이 유효하지 않습니다.");
+
+    // 1. Access Token 에서 identifier 가져오기
+    String identifier = tokenProvider.getIdentifier(reissueRequestDto.getAccessToken()).getSubject();
+
+    // 2. Refresh Token 일치여부 확인
+    String refreshToken = refreshTokenService.getRefreshToken(identifier);
+
+    if (refreshToken == null || !refreshToken.equals(reissueRequestDto.getRefreshToken())) {
+      throw new CustomException(ErrorCode.REFRESH_TOKEN_INCONSISTENCY);
     }
 
-    // 2. Access Token 에서 identifier 가져오기
-    Authentication authentication = tokenProvider.getAuthentication(reissueRequestDto.getAccessToken());
+    // 3. 새로운 Access Token 생성
+    String accessToken = tokenProvider.createAccessToken(identifier);
 
-    // 3. 저장소에서 Member ID 를 기반으로 Refresh Token 값 가져옴
-    RefreshToken refreshToken = refreshTokenRepository.findByIdentifier(authentication.getName())
-        .orElseThrow(() -> new CustomException(ErrorCode.LOGOUT_USER));
-
-    // 4. Refresh Token 일치하는지 검사
-    if (!refreshToken.getToken().equals(reissueRequestDto.getRefreshToken())) {
-      throw new RuntimeException("토큰의 유저 정보가 일치하지 않습니다.");
-    }
-
-    // 5. 새로운 토큰 생성
-    TokenDto tokenDto = tokenProvider.createToken(authentication);
-
-    // 6. 저장소 정보 업데이트
-    RefreshToken newRefreshToken = refreshToken.updateToken(tokenDto.getRefreshToken());
-    refreshTokenRepository.save(newRefreshToken);
-
-    // 7. 토큰 발급
-    return new ReissueResponseDto(tokenDto.getAccessToken(), tokenDto.getRefreshToken());
+    // 4. 토큰 발급
+    return new ReissueResponseDto(accessToken, refreshToken);
   }
 
   // ========== Logout API ==========
