@@ -149,8 +149,6 @@ public class AuthService {
     String identifier = authentication.getName();
 
     // 2. RefreshToken 삭제
-    RefreshToken refreshToken = refreshTokenRepository.deleteByIdentifier(identifier)
-        .orElseThrow(() -> new CustomException(ErrorCode.LOGOUT_USER));
-
+    refreshTokenService.deleteRefreshToken(identifier);
   }
 }
