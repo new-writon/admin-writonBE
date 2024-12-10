@@ -16,10 +16,13 @@ import com.writon.admin.domain.repository.user.UserChallengeRepository;
 import com.writon.admin.global.error.CustomException;
 import com.writon.admin.global.error.ErrorCode;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import software.amazon.awssdk.services.s3.endpoints.internal.Value.Bool;
 
 @Service
 @RequiredArgsConstructor
@@ -125,5 +128,20 @@ public class ParticipationService {
         .orElseThrow(() -> new CustomException(ErrorCode.ETC_ERROR));
 
     return sendedEmailList.stream().map(Email::getEmail).toList();
+  }
+
+  public Boolean isParticipated(Long challengeId, List<String> emailList) {
+    List<String> participatedEmailList = getEmailList(challengeId);
+
+    // EmailList를 Set으로 변환하여 검색 속도 향상
+    Set<String> participatedEmailSet = new HashSet<>(participatedEmailList);
+
+    for (String email : emailList) {
+      if (participatedEmailSet.contains(email)) {
+        return true;
+      }
+    }
+
+    return false;
   }
 }

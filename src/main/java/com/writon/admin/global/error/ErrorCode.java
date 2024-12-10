@@ -30,7 +30,10 @@ public enum ErrorCode {
   ORGANIZATION_NOT_FOUND(HttpStatus.NOT_FOUND, "O01", "조직 정보를 찾을 수 없습니다"),
 
   // challenge
-  CHALLENGE_NOT_FOUND(HttpStatus.NOT_FOUND, "C01", "챌린지 정보를 찾을 수 없습니다");
+  CHALLENGE_NOT_FOUND(HttpStatus.NOT_FOUND, "C01", "챌린지 정보를 찾을 수 없습니다"),
+
+  // participation
+  EMAIL_DUPLICATION(HttpStatus.BAD_REQUEST, "P01", "중복되는 이메일이 존재합니다");
 
   private final HttpStatus httpStatus;
   private final String code;
