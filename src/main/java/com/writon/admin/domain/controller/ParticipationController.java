@@ -3,6 +3,8 @@ package com.writon.admin.domain.controller;
 import com.writon.admin.domain.entity.lcoal.ParticipationInfo;
 import com.writon.admin.domain.service.EmailService;
 import com.writon.admin.domain.service.ParticipationService;
+import com.writon.admin.global.error.CustomException;
+import com.writon.admin.global.error.ErrorCode;
 import com.writon.admin.global.response.SuccessDto;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
@@ -53,13 +55,16 @@ public class ParticipationController {
       @RequestParam Long challengeId,
       @RequestBody List<String> emailList
   ) {
+    if (!participationService.isParticipated(challengeId, emailList)) {
+      List<String> sendedEmailList = participationService.participate(
+          challengeId,
+          emailList
+      );
 
-    List<String> sendedEmailList = participationService.participate(
-        challengeId,
-        emailList
-    );
-
-    return new SuccessDto<>(sendedEmailList);
+      return new SuccessDto<>(sendedEmailList);
+    } else {
+      throw new CustomException(ErrorCode.EMAIL_DUPLICATION);
+    }
   }
 
 
