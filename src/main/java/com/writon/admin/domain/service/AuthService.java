@@ -10,11 +10,9 @@ import com.writon.admin.domain.entity.challenge.Challenge;
 import com.writon.admin.domain.entity.lcoal.ChallengeResponse;
 import com.writon.admin.domain.entity.organization.AdminUser;
 import com.writon.admin.domain.entity.organization.Organization;
-import com.writon.admin.domain.entity.token.RefreshToken;
 import com.writon.admin.domain.repository.challenge.ChallengeRepository;
 import com.writon.admin.domain.repository.organization.AdminUserRepository;
 import com.writon.admin.domain.repository.organization.OrganizationRepository;
-import com.writon.admin.domain.repository.token.RefreshTokenRepository;
 import com.writon.admin.global.config.auth.TokenDto;
 import com.writon.admin.global.config.auth.TokenProvider;
 import com.writon.admin.global.error.CustomException;
@@ -22,7 +20,6 @@ import com.writon.admin.global.error.ErrorCode;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
@@ -38,10 +35,10 @@ public class AuthService {
 
   private final AdminUserRepository adminUserRepository;
   private final OrganizationRepository organizationRepository;
+  private final RefreshTokenService refreshTokenService;
 
   private final PasswordEncoder passwordEncoder;
   private final AuthenticationManagerBuilder authenticationManagerBuilder;
-  private final RefreshTokenRepository refreshTokenRepository;
   private final TokenProvider tokenProvider;
   private final ChallengeRepository challengeRepository;
 
@@ -49,7 +46,7 @@ public class AuthService {
   // ========== SignUp API ==========
   public SignUpResponseDto signup(SignUpRequestDto signUpRequestDto) {
     if (adminUserRepository.existsByIdentifier(signUpRequestDto.getIdentifier())) {
-      throw new RuntimeException("이미 가입되어 있는 유저입니다");
+      throw new CustomException(ErrorCode.ETC_ERROR);
     }
 
     AdminUser encodedAdminUser = signUpRequestDto.toAdminUser(passwordEncoder);
@@ -63,28 +60,24 @@ public class AuthService {
 
     // 1. Login ID/PW 를 기반으로 AuthenticationToken 생성
     UsernamePasswordAuthenticationToken authenticationToken = loginRequestDto.toAuthentication();
-    System.out.println("1 실행");
 
     // 2. 실제로 검증 (사용자 비밀번호 체크) 이 이루어지는 부분
     // authenticate 메서드가 실행이 될 때 CustomUserDetailsService 에서 만들었던 loadUserByUsername 메서드가 실행됨
     Authentication authentication = authenticationManagerBuilder.getObject()
         .authenticate(authenticationToken);
-    System.out.println("2 실행");
+    String identifier = authentication.getName();
 
     // 3. 인증 정보를 기반으로 JWT 토큰 생성
-    TokenDto tokenDto = tokenProvider.createToken(authentication);
-    System.out.println("3 실행");
+    TokenDto tokenDto = tokenProvider.createToken(identifier);
 
-    // 4. RefreshToken 저장
-    RefreshToken refreshToken = RefreshToken.builder()
-        .token(tokenDto.getRefreshToken())
-        .identifier(authentication.getName())
-        .build();
-
-    refreshTokenRepository.save(refreshToken);
+    // 4. RefreshToken 저장 (이미 존재한다면 전부 제거 후 저장)
+    while (refreshTokenService.hasKey(identifier)) {
+      refreshTokenService.deleteRefreshToken(identifier);
+    }
+    refreshTokenService.saveRefreshToken(identifier, tokenDto.getRefreshToken());
 
     // 5. 해당 Organization 정보 가져오기
-    AdminUser adminUser = adminUserRepository.findByIdentifier(authentication.getName())
+    AdminUser adminUser = adminUserRepository.findByIdentifier(identifier)
         .orElseThrow(() -> new UsernameNotFoundException(" -> 데이터베이스에서 찾을 수 없습니다."));
     Optional<Organization> organization = organizationRepository.findByAdminUserId(adminUser.getId());
 
@@ -113,32 +106,22 @@ public class AuthService {
 
   // ========== Reissue API ==========
   public ReissueResponseDto reissue(ReissueRequestDto reissueRequestDto) {
-    // 1. Refresh Token 검증
-    if (!tokenProvider.validateToken(reissueRequestDto.getRefreshToken())) {
-      throw new RuntimeException("Refresh Token 이 유효하지 않습니다.");
+
+    // 1. Access Token 에서 identifier 가져오기
+    String identifier = tokenProvider.getIdentifier(reissueRequestDto.getAccessToken()).getSubject();
+
+    // 2. Refresh Token 일치여부 확인
+    String refreshToken = refreshTokenService.getRefreshToken(identifier);
+
+    if (refreshToken == null || !refreshToken.equals(reissueRequestDto.getRefreshToken())) {
+      throw new CustomException(ErrorCode.REFRESH_TOKEN_INCONSISTENCY);
     }
 
-    // 2. Access Token 에서 identifier 가져오기
-    Authentication authentication = tokenProvider.getAuthentication(reissueRequestDto.getAccessToken());
+    // 3. 새로운 Access Token 생성
+    String accessToken = tokenProvider.createAccessToken(identifier);
 
-    // 3. 저장소에서 Member ID 를 기반으로 Refresh Token 값 가져옴
-    RefreshToken refreshToken = refreshTokenRepository.findByIdentifier(authentication.getName())
-        .orElseThrow(() -> new CustomException(ErrorCode.LOGOUT_USER));
-
-    // 4. Refresh Token 일치하는지 검사
-    if (!refreshToken.getToken().equals(reissueRequestDto.getRefreshToken())) {
-      throw new RuntimeException("토큰의 유저 정보가 일치하지 않습니다.");
-    }
-
-    // 5. 새로운 토큰 생성
-    TokenDto tokenDto = tokenProvider.createToken(authentication);
-
-    // 6. 저장소 정보 업데이트
-    RefreshToken newRefreshToken = refreshToken.updateToken(tokenDto.getRefreshToken());
-    refreshTokenRepository.save(newRefreshToken);
-
-    // 7. 토큰 발급
-    return new ReissueResponseDto(tokenDto.getAccessToken(), tokenDto.getRefreshToken());
+    // 4. 토큰 발급
+    return new ReissueResponseDto(accessToken, refreshToken);
   }
 
   // ========== Logout API ==========
@@ -149,8 +132,6 @@ public class AuthService {
     String identifier = authentication.getName();
 
     // 2. RefreshToken 삭제
-    RefreshToken refreshToken = refreshTokenRepository.deleteByIdentifier(identifier)
-        .orElseThrow(() -> new CustomException(ErrorCode.LOGOUT_USER));
-
+    refreshTokenService.deleteRefreshToken(identifier);
   }
 }
