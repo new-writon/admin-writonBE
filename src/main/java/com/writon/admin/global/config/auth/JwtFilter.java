@@ -1,11 +1,15 @@
 package com.writon.admin.global.config.auth;
 
+import com.writon.admin.global.error.ErrorCode;
+import com.writon.admin.global.error.ExceptionResponseHandler;
+import io.jsonwebtoken.Claims;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.util.StringUtils;
@@ -18,6 +22,8 @@ public class JwtFilter extends OncePerRequestFilter {
   public static final String BEARER_PREFIX = "Bearer ";
 
   private final TokenProvider tokenProvider;
+  private final RedisTemplate<String, Object> redisTemplate;
+  private final ExceptionResponseHandler exceptionResponseHandler = new ExceptionResponseHandler();
 
   // 실제 필터링 로직은 doFilterInternal 에 들어감
   // JWT 토큰의 인증 정보를 현재 쓰레드의 SecurityContext 에 저장하는 역할 수행
@@ -31,14 +37,21 @@ public class JwtFilter extends OncePerRequestFilter {
     // 1. Request Header 에서 토큰을 꺼냄
     String jwt = resolveToken(request);
 
-    // 2. validateToken 으로 토큰 유효성 검사
-    // 정상 토큰이면 해당 토큰으로 Authentication 을 가져와서 SecurityContext 에 저장
-    if (StringUtils.hasText(jwt) && tokenProvider.validateToken(jwt)) {
+    // 2. 토큰의 존재여부 & accessToken 유효성 검사
+    if (tokenProvider.validateToken(jwt, request) && StringUtils.hasText(jwt)) {
       System.out.println("JWT Token 검증 통과");
-      Authentication authentication = tokenProvider.getAuthentication(jwt);
+
+      // 3. 로그아웃 유저 확인 (access: O, refresh: X)
+      Claims identifier = tokenProvider.getIdentifier(jwt);
+
+      if (redisTemplate.opsForValue().get(identifier.getSubject()) == null) {
+        exceptionResponseHandler.setResponse(response, ErrorCode.REFRESH_TOKEN_EXPIRATION);
+        return;
+      }
+
+      // 4. 정상적인 인증확인 (access: O, refresh: O)
+      Authentication authentication = tokenProvider.getAuthentication(identifier);
       SecurityContextHolder.getContext().setAuthentication(authentication);
-    } else {
-      System.out.println("JWT Token 검증 실패");
     }
 
     filterChain.doFilter(request, response);

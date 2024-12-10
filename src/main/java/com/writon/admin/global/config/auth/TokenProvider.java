@@ -129,10 +129,18 @@ public class TokenProvider {
       log.info("잘못된 JWT 서명입니다.");
     } catch (ExpiredJwtException e) {
       log.info("만료된 JWT 토큰입니다.");
+      // 토큰 재발급의 경우 유효성 통과해서 로직 실행하도록 설정
+      if (request.getRequestURI().equals("/auth/reissue") || request.getRequestURI().equals("/auth/logout")) {
+        return true;
+      } else {
+        // Token 만료 예외처리
+        request.setAttribute("exception", ErrorCode.ACCESS_TOKEN_EXPIRATION.getCode());
+      }
     } catch (UnsupportedJwtException e) {
       log.info("지원되지 않는 JWT 토큰입니다.");
     } catch (IllegalArgumentException e) {
       log.info("JWT 토큰이 잘못되었습니다.");
+      request.setAttribute("exception", ErrorCode.UNAUTHORIZED_TOKEN.getCode());
     }
     return false;
   }

@@ -7,6 +7,7 @@ import com.writon.admin.global.config.auth.TokenProvider;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
@@ -24,6 +25,7 @@ public class SecurityConfig {
   private final TokenProvider tokenProvider;
   private final JwtAuthenticationEntryPoint jwtAuthenticationEntryPoint;
   private final JwtAccessDeniedHandler jwtAccessDeniedHandler;
+  private final RedisTemplate<String, Object> redisTemplate;
 
   @Bean
   public PasswordEncoder passwordEncoder() {
@@ -57,7 +59,7 @@ public class SecurityConfig {
 
         // JwtFilter로 인터셉트하는 과정
         .addFilterBefore(
-            new JwtFilter(tokenProvider),
+            new JwtFilter(tokenProvider, redisTemplate),
             UsernamePasswordAuthenticationFilter.class
         );
 
