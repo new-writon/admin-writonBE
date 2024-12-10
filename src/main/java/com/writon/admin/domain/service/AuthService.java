@@ -49,7 +49,7 @@ public class AuthService {
   // ========== SignUp API ==========
   public SignUpResponseDto signup(SignUpRequestDto signUpRequestDto) {
     if (adminUserRepository.existsByIdentifier(signUpRequestDto.getIdentifier())) {
-      throw new RuntimeException("이미 가입되어 있는 유저입니다");
+      throw new CustomException(ErrorCode.ETC_ERROR);
     }
 
     AdminUser encodedAdminUser = signUpRequestDto.toAdminUser(passwordEncoder);
