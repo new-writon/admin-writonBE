@@ -139,8 +139,8 @@ public class TokenProvider {
     } catch (UnsupportedJwtException e) {
       log.info("지원되지 않는 JWT 토큰입니다.");
     } catch (IllegalArgumentException e) {
-      log.info("JWT 토큰이 잘못되었습니다.");
-      request.setAttribute("exception", ErrorCode.UNAUTHORIZED_TOKEN.getCode());
+      log.info("아이디나 비밀번호가 잘못되었습니다");
+      request.setAttribute("exception", ErrorCode.NOT_CORRECT_USER.getCode());
     }
     return false;
   }

@@ -1,6 +1,5 @@
 package com.writon.admin.global.config.auth;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.writon.admin.global.error.ErrorCode;
 import com.writon.admin.global.error.ExceptionResponseHandler;
 import jakarta.servlet.http.HttpServletRequest;
@@ -38,8 +37,8 @@ public class JwtAuthenticationEntryPoint implements AuthenticationEntryPoint {
         errorCode = ErrorCode.REFRESH_TOKEN_EXPIRATION;
       }
 
-      if (exception.equals(ErrorCode.UNAUTHORIZED_TOKEN.getCode())) {
-        errorCode = ErrorCode.UNAUTHORIZED_TOKEN;
+      if (exception.equals(ErrorCode.NOT_CORRECT_USER.getCode())) {
+        errorCode = ErrorCode.NOT_CORRECT_USER;
       }
     }
 
