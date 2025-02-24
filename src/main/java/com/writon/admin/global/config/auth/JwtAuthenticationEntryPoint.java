@@ -1,21 +1,23 @@
 package com.writon.admin.global.config.auth;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.writon.admin.global.error.CustomException;
 import com.writon.admin.global.error.ErrorCode;
-import com.writon.admin.global.response.ErrorDto;
+import com.writon.admin.global.error.ExceptionResponseHandler;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
-import org.springframework.http.MediaType;
+import lombok.AllArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.web.AuthenticationEntryPoint;
 import org.springframework.stereotype.Component;
 
+@Slf4j
 @Component
+@AllArgsConstructor
 public class JwtAuthenticationEntryPoint implements AuthenticationEntryPoint {
 
-  private final ObjectMapper objectMapper = new ObjectMapper();
+  private final ExceptionResponseHandler exceptionResponseHandler;
 
   @Override
   public void commence(
@@ -23,18 +25,24 @@ public class JwtAuthenticationEntryPoint implements AuthenticationEntryPoint {
       HttpServletResponse response,
       AuthenticationException authException
   ) throws IOException {
-    // 유효한 자격증명을 제공하지 않고 접근하려 할때 401
-    setResponse(response, ErrorCode.TOKEN_ERROR);
-  }
+//    System.out.println("JwtAuthenticationEntryPoint");
+    String exception = (String) request.getAttribute("exception");
+    ErrorCode errorCode = ErrorCode.UNAUTHORIZED;
 
-  private void setResponse(HttpServletResponse response, ErrorCode errorCode) throws IOException {
-    response.setStatus(errorCode.getHttpStatus().value());
-    response.setContentType(MediaType.APPLICATION_JSON_VALUE);
-    response.setCharacterEncoding("UTF-8");
-    response.getWriter().write(objectMapper.writeValueAsString(ErrorDto.builder()
-        .status(errorCode.getHttpStatus().value())
-        .code(errorCode.getCode())
-        .message(errorCode.getMessage())
-        .build()));
+    if (exception != null) {
+      if (exception.equals(ErrorCode.ACCESS_TOKEN_EXPIRATION.getCode())) {
+        errorCode = ErrorCode.ACCESS_TOKEN_EXPIRATION;
+      }
+
+      if (exception.equals(ErrorCode.REFRESH_TOKEN_EXPIRATION.getCode())) {
+        errorCode = ErrorCode.REFRESH_TOKEN_EXPIRATION;
+      }
+
+      if (exception.equals(ErrorCode.UNAUTHORIZED_TOKEN.getCode())) {
+        errorCode = ErrorCode.UNAUTHORIZED_TOKEN;
+      }
+    }
+
+    exceptionResponseHandler.setResponse(response, errorCode);
   }
 }
