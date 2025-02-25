@@ -13,7 +13,7 @@ public enum ErrorCode {
   BAD_REQUEST(HttpStatus.BAD_REQUEST, "400", "잘못된 요청입니다"), // 400 Bad Request
   UNAUTHORIZED(HttpStatus.UNAUTHORIZED, "401", "권한이 없습니다"), // 401 Unauthorized
   FORBIDDEN(HttpStatus.FORBIDDEN, "403", "잘못된 요청입니다"), // 403 Forbidden
-  NOT_FOUND(HttpStatus.NOT_FOUND, "404", "사용자를 찾을 수 없습니다"), // 404 Not Found
+  NOT_FOUND(HttpStatus.NOT_FOUND, "404", "정보를 찾을 수 없습니다"), // 404 Not Found
   METHOD_NOT_ALLOWED(HttpStatus.METHOD_NOT_ALLOWED, "405", "허용되지 않은 메소드입니다"), // 405 Method Not Allowed
   CONFLICT(HttpStatus.CONFLICT, "409", "이미 가입한 사용자입니다"), // 409 Conflict
   INTERNAL_SERVER_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "500", "서버에 오류가 발생하였습니다"), // 500 Internal Server Error
@@ -25,6 +25,9 @@ public enum ErrorCode {
   REFRESH_TOKEN_EXPIRATION(HttpStatus.UNAUTHORIZED, "A03", "만료된 토큰입니다"),
   ACCESS_TOKEN_EXPIRATION(HttpStatus.UNAUTHORIZED, "A04", "토큰 재발급을 요청해주세요"),
   REFRESH_TOKEN_INCONSISTENCY(HttpStatus.NOT_FOUND, "A05", "토큰이 일치하지 않습니다"),
+  BAD_CREDENTIAL_ACCESS(HttpStatus.BAD_REQUEST, "A06", "아이디 혹은 비밀번호가 잘못되었습니다"),
+  DISABLED_USER(HttpStatus.NOT_FOUND, "A07", "비활성화된 계정입니다"),
+  LOCKED_USER(HttpStatus.NOT_FOUND, "A08", "계정이 잠겨 있습니다"),
 
   // organization
   ORGANIZATION_NOT_FOUND(HttpStatus.NOT_FOUND, "O01", "조직 정보를 찾을 수 없습니다"),
