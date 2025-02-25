@@ -37,8 +37,8 @@ public class JwtAuthenticationEntryPoint implements AuthenticationEntryPoint {
         errorCode = ErrorCode.REFRESH_TOKEN_EXPIRATION;
       }
 
-      if (exception.equals(ErrorCode.NOT_CORRECT_USER.getCode())) {
-        errorCode = ErrorCode.NOT_CORRECT_USER;
+      if (exception.equals(ErrorCode.UNAUTHORIZED_TOKEN.getCode())) {
+        errorCode = ErrorCode.UNAUTHORIZED_TOKEN;
       }
     }
 

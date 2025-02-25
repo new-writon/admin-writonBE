@@ -8,6 +8,8 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.util.Arrays;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.security.core.Authentication;
@@ -24,6 +26,14 @@ public class JwtFilter extends OncePerRequestFilter {
   private final TokenProvider tokenProvider;
   private final RedisTemplate<String, Object> redisTemplate;
   private final ExceptionResponseHandler exceptionResponseHandler = new ExceptionResponseHandler();
+  private final List<String> excludedPaths = Arrays.asList("/auth/login","/auth/signup");
+
+  @Override
+  protected boolean shouldNotFilter(HttpServletRequest request) throws ServletException{
+    // 로그인, 회원가입 API URL이 포함되는지 확인하는 함수
+    String path = request.getRequestURI();
+    return excludedPaths.stream().anyMatch(path::equals);
+  }
 
   // 실제 필터링 로직은 doFilterInternal 에 들어감
   // JWT 토큰의 인증 정보를 현재 쓰레드의 SecurityContext 에 저장하는 역할 수행
@@ -38,7 +48,7 @@ public class JwtFilter extends OncePerRequestFilter {
     String jwt = resolveToken(request);
 
     // 2. 토큰의 존재여부 & accessToken 유효성 검사
-    if (tokenProvider.validateToken(jwt, request) && StringUtils.hasText(jwt)) {
+    if (StringUtils.hasText(jwt) && tokenProvider.validateToken(jwt, request)) {
       System.out.println("JWT Token 검증 통과");
 
       // 3. 로그아웃 유저 확인 (access: O, refresh: X)
