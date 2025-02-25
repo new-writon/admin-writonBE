@@ -48,7 +48,7 @@ public class JwtFilter extends OncePerRequestFilter {
     String jwt = resolveToken(request);
 
     // 2. 토큰의 존재여부 & accessToken 유효성 검사
-    if (tokenProvider.validateToken(jwt, request) && StringUtils.hasText(jwt)) {
+    if (StringUtils.hasText(jwt) && tokenProvider.validateToken(jwt, request)) {
       System.out.println("JWT Token 검증 통과");
 
       // 3. 로그아웃 유저 확인 (access: O, refresh: X)
