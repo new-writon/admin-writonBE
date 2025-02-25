@@ -21,7 +21,7 @@ public enum ErrorCode {
 
   // auth
   USER_NOT_FOUND(HttpStatus.NOT_FOUND, "A01", "사용자를 찾을 수 없습니다"),
-  NOT_CORRECT_USER(HttpStatus.BAD_REQUEST, "A02", "아이디나 비밀번호가 잘못되었습니다"),
+  UNAUTHORIZED_TOKEN(HttpStatus.UNAUTHORIZED, "A02", "권한이 없는 토큰입니다"),
   REFRESH_TOKEN_EXPIRATION(HttpStatus.UNAUTHORIZED, "A03", "만료된 토큰입니다"),
   ACCESS_TOKEN_EXPIRATION(HttpStatus.UNAUTHORIZED, "A04", "토큰 재발급을 요청해주세요"),
   REFRESH_TOKEN_INCONSISTENCY(HttpStatus.NOT_FOUND, "A05", "토큰이 일치하지 않습니다"),
