@@ -4,16 +4,16 @@ import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.model.CannedAccessControlList;
 import com.amazonaws.services.s3.model.ObjectMetadata;
 import com.amazonaws.services.s3.model.PutObjectRequest;
-import com.writon.admin.domain.entity.organization.Organization;
-import com.writon.admin.domain.repository.organization.PositionRepository;
 import com.writon.admin.domain.util.TokenUtil;
 import com.writon.admin.global.error.CustomException;
 import com.writon.admin.global.error.ErrorCode;
 import java.io.IOException;
+import java.util.Objects;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
+import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
@@ -33,7 +33,11 @@ public class ImageService {
     metadata.setContentType(file.getContentType());
     metadata.setSSEAlgorithm(ObjectMetadata.AES_256_SERVER_SIDE_ENCRYPTION);
 
-    String fileName = "logo/" + file.getOriginalFilename();
+    // 2. 파일명 생성
+    String uuid = UUID.randomUUID().toString();
+    String[] parts = Objects.requireNonNull(file.getOriginalFilename()).split("\\.");
+    String extension = parts[parts.length - 1];
+    String fileName = "logo/" + uuid + "." + extension;
 
     // 2. Amazon S3에 이미지 등록
     try {
