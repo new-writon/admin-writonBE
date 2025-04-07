@@ -21,13 +21,14 @@ public enum ErrorCode {
 
   // auth
   USER_NOT_FOUND(HttpStatus.NOT_FOUND, "A01", "사용자를 찾을 수 없습니다"),
-  UNAUTHORIZED_TOKEN(HttpStatus.UNAUTHORIZED, "A02", "권한이 없는 토큰입니다"),
-  REFRESH_TOKEN_EXPIRATION(HttpStatus.UNAUTHORIZED, "A03", "만료된 토큰입니다"),
-  ACCESS_TOKEN_EXPIRATION(HttpStatus.UNAUTHORIZED, "A04", "토큰 재발급을 요청해주세요"),
-  REFRESH_TOKEN_INCONSISTENCY(HttpStatus.NOT_FOUND, "A05", "토큰이 일치하지 않습니다"),
-  BAD_CREDENTIAL_ACCESS(HttpStatus.BAD_REQUEST, "A06", "아이디 혹은 비밀번호가 잘못되었습니다"),
-  DISABLED_USER(HttpStatus.NOT_FOUND, "A07", "비활성화된 계정입니다"),
-  LOCKED_USER(HttpStatus.NOT_FOUND, "A08", "계정이 잠겨 있습니다"),
+  BAD_CREDENTIAL_ACCESS(HttpStatus.BAD_REQUEST, "A02", "비밀번호가 잘못되었습니다"),
+  UNAUTHORIZED_TOKEN(HttpStatus.UNAUTHORIZED, "A03", "권한이 없는 토큰입니다"),
+  ACCESS_TOKEN_EXPIRATION(HttpStatus.UNAUTHORIZED, "A04", "AccessToken이 만료되었습니다"),
+  ACCESS_TOKEN_NOT_FOUND(HttpStatus.NOT_FOUND, "A05", "AccessToken이 존재하지 않습니다"),
+  REFRESH_TOKEN_EXPIRATION(HttpStatus.UNAUTHORIZED, "A06", "RefreshToken이 만료되었습니다"),
+  REFRESH_TOKEN_INCONSISTENCY(HttpStatus.NOT_FOUND, "A07", "RefreshToken이 일치하지 않습니다"),
+  DISABLED_USER(HttpStatus.NOT_FOUND, "A08", "비활성화된 계정입니다"),
+  LOCKED_USER(HttpStatus.NOT_FOUND, "A09", "계정이 잠겨 있습니다"),
 
   // organization
   ORGANIZATION_NOT_FOUND(HttpStatus.NOT_FOUND, "O01", "조직 정보를 찾을 수 없습니다"),

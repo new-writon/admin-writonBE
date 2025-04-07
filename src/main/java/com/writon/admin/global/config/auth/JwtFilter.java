@@ -5,6 +5,7 @@ import com.writon.admin.global.error.ExceptionResponseHandler;
 import io.jsonwebtoken.Claims;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
+import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
@@ -20,16 +21,13 @@ import org.springframework.web.filter.OncePerRequestFilter;
 @RequiredArgsConstructor
 public class JwtFilter extends OncePerRequestFilter {
 
-  public static final String AUTHORIZATION_HEADER = "Authorization";
-  public static final String BEARER_PREFIX = "Bearer ";
-
   private final TokenProvider tokenProvider;
   private final RedisTemplate<String, Object> redisTemplate;
   private final ExceptionResponseHandler exceptionResponseHandler = new ExceptionResponseHandler();
   private final List<String> excludedPaths = Arrays.asList("/auth/login","/auth/signup");
 
   @Override
-  protected boolean shouldNotFilter(HttpServletRequest request) throws ServletException{
+  protected boolean shouldNotFilter(HttpServletRequest request) {
     // 로그인, 회원가입 API URL이 포함되는지 확인하는 함수
     String path = request.getRequestURI();
     return excludedPaths.stream().anyMatch(path::equals);
@@ -45,21 +43,26 @@ public class JwtFilter extends OncePerRequestFilter {
   ) throws IOException, ServletException {
 
     // 1. Request Header 에서 토큰을 꺼냄
-    String jwt = resolveToken(request);
+    String accessToken = extractTokenFromCookie(request, "accessToken");
+    String refreshToken = extractTokenFromCookie(request, "refreshToken");
 
-    // 2. 토큰의 존재여부 & accessToken 유효성 검사
-    if (StringUtils.hasText(jwt) && tokenProvider.validateToken(jwt, request)) {
-      System.out.println("JWT Token 검증 통과");
+    // 2. 토큰의 존재여부 검사
+    if (!StringUtils.hasText(accessToken)){
+      exceptionResponseHandler.setResponse(response, ErrorCode.ACCESS_TOKEN_NOT_FOUND);
+      return;
 
-      // 3. 로그아웃 유저 확인 (access: O, refresh: X)
-      Claims identifier = tokenProvider.getIdentifier(jwt);
+    // 3. accessToken 유효성 검사
+    } else if (tokenProvider.validateToken(accessToken, request)) {
 
-      if (redisTemplate.opsForValue().get(identifier.getSubject()) == null) {
+      // 4. 장시간 사용자 확인 (access: O, refresh: X)
+      Claims identifier = tokenProvider.getIdentifier(accessToken);
+
+      if (refreshToken == null || redisTemplate.opsForValue().get(identifier.getSubject()) == null) {
         exceptionResponseHandler.setResponse(response, ErrorCode.REFRESH_TOKEN_EXPIRATION);
         return;
       }
 
-      // 4. 정상적인 인증확인 (access: O, refresh: O)
+      // 5. 정상적인 인증확인 (access: O, refresh: O)
       Authentication authentication = tokenProvider.getAuthentication(identifier);
       SecurityContextHolder.getContext().setAuthentication(authentication);
     }
@@ -67,11 +70,16 @@ public class JwtFilter extends OncePerRequestFilter {
     filterChain.doFilter(request, response);
   }
 
-  // Request Header 에서 토큰 정보 추출
-  private String resolveToken(HttpServletRequest request) {
-    String bearerToken = request.getHeader(AUTHORIZATION_HEADER);
-    if (StringUtils.hasText(bearerToken) && bearerToken.startsWith(BEARER_PREFIX)) {
-      return bearerToken.split(" ")[1].trim();
+
+  // Cookie로부터 Token을 추출하는 메서드
+  public String extractTokenFromCookie(HttpServletRequest request, String tokenName) {
+    Cookie[] cookies = request.getCookies();
+    if (cookies != null) {
+      for (Cookie cookie : cookies) {
+        if (tokenName.equals(cookie.getName())) {
+          return cookie.getValue();
+        }
+      }
     }
     return null;
   }

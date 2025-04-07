@@ -6,6 +6,7 @@ import com.writon.admin.domain.dto.request.auth.ReissueRequestDto;
 import com.writon.admin.domain.dto.response.auth.LoginResponseDto;
 import com.writon.admin.domain.dto.response.auth.ReissueResponseDto;
 import com.writon.admin.domain.dto.response.auth.SignUpResponseDto;
+import com.writon.admin.domain.dto.wrapper.auth.LoginResponseWrapper;
 import com.writon.admin.domain.entity.challenge.Challenge;
 import com.writon.admin.domain.entity.lcoal.ChallengeResponse;
 import com.writon.admin.domain.entity.organization.AdminUser;
@@ -17,6 +18,7 @@ import com.writon.admin.global.config.auth.TokenDto;
 import com.writon.admin.global.config.auth.TokenProvider;
 import com.writon.admin.global.error.CustomException;
 import com.writon.admin.global.error.ErrorCode;
+import jakarta.servlet.http.HttpServletRequest;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
@@ -59,7 +61,7 @@ public class AuthService {
   }
 
   // ========== Login API ==========
-  public LoginResponseDto login(LoginRequestDto loginRequestDto) {
+  public LoginResponseWrapper login(LoginRequestDto loginRequestDto) {
 
     // 1. Login ID/PW 를 기반으로 AuthenticationToken 생성
     UsernamePasswordAuthenticationToken authenticationToken = loginRequestDto.toAuthentication();
@@ -103,10 +105,7 @@ public class AuthService {
         .map(entity -> new ChallengeResponse(entity.getId(), entity.getName()))
         .toList();
 
-    // 8. Response 전달
-    return new LoginResponseDto(
-        tokenDto.getAccessToken(),
-        tokenDto.getRefreshToken(),
+    LoginResponseDto loginResponseDto = new LoginResponseDto(
         organization.isPresent(),
         organization.map(Organization::getId).orElse(null),
         organization.map(Organization::getName).orElse(null),
@@ -114,26 +113,27 @@ public class AuthService {
         organization.map(Organization::getLogo).orElse(null),
         challengeList
     );
+
+    // 8. Response 전달
+    return new LoginResponseWrapper(tokenDto, loginResponseDto);
   }
 
   // ========== Reissue API ==========
-  public ReissueResponseDto reissue(ReissueRequestDto reissueRequestDto) {
+  public String reissue(String accessToken, String refreshToken) {
 
     // 1. Access Token 에서 identifier 가져오기
-    String identifier = tokenProvider.getIdentifier(reissueRequestDto.getAccessToken()).getSubject();
+    String identifier = tokenProvider.getIdentifier(accessToken)
+        .getSubject();
 
     // 2. Refresh Token 일치여부 확인
-    String refreshToken = refreshTokenService.getRefreshToken(identifier);
+    String storedRefreshToken = refreshTokenService.getRefreshToken(identifier);
 
-    if (refreshToken == null || !refreshToken.equals(reissueRequestDto.getRefreshToken())) {
+    if (refreshToken == null || !refreshToken.equals(storedRefreshToken)) {
       throw new CustomException(ErrorCode.REFRESH_TOKEN_INCONSISTENCY);
     }
 
     // 3. 새로운 Access Token 생성
-    String accessToken = tokenProvider.createAccessToken(identifier);
-
-    // 4. 토큰 발급
-    return new ReissueResponseDto(accessToken, refreshToken);
+    return tokenProvider.createAccessToken(identifier);
   }
 
   // ========== Logout API ==========

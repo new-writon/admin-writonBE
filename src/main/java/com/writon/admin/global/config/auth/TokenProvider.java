@@ -30,8 +30,8 @@ import org.springframework.stereotype.Component;
 public class TokenProvider {
 
   private static final String AUTHORITIES_KEY = "auth";
-  private static final long ACCESS_TOKEN_EXPIRE_TIME = 1000 * 60 * 10;        // 10분
-  private static final long REFRESH_TOKEN_EXPIRE_TIME = 1000 * 60 * 60 * 2;   // 2시간
+  private static final long ACCESS_TOKEN_EXPIRE_TIME = 1000 * 60 * 60;          // 1시간 (단위: ms)
+  private static final long REFRESH_TOKEN_EXPIRE_TIME = 1000 * 60 * 60 * 24;    // 1일(24시간) (단위: ms)
 
   private final Key key;
 
@@ -44,10 +44,8 @@ public class TokenProvider {
   // 유저 정보를 가지고 AccessToken, RefreshToken 을 생성하는 메서드
   public TokenDto createToken(String identifier) {
 
-    // AccessToken 생성
+    // Token 생성
     String accessToken = createAccessToken(identifier);
-
-    // RefreshToken 생성
     String refreshToken = createRefreshToken();
 
     return TokenDto.builder()
@@ -129,7 +127,7 @@ public class TokenProvider {
       log.info("잘못된 JWT 서명입니다.");
     } catch (ExpiredJwtException e) {
       log.info("만료된 JWT 토큰입니다.");
-      // 토큰 재발급의 경우 유효성 통과해서 로직 실행하도록 설정
+      // 토큰 재발급, 로그아웃의 경우 유효성 통과해서 로직 실행하도록 설정
       if (request.getRequestURI().equals("/auth/reissue") || request.getRequestURI().equals("/auth/logout")) {
         return true;
       } else {

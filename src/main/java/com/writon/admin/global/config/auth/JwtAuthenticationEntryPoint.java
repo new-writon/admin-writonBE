@@ -24,13 +24,16 @@ public class JwtAuthenticationEntryPoint implements AuthenticationEntryPoint {
       HttpServletResponse response,
       AuthenticationException authException
   ) throws IOException {
-//    System.out.println("JwtAuthenticationEntryPoint");
     String exception = (String) request.getAttribute("exception");
     ErrorCode errorCode = ErrorCode.UNAUTHORIZED;
 
     if (exception != null) {
       if (exception.equals(ErrorCode.ACCESS_TOKEN_EXPIRATION.getCode())) {
         errorCode = ErrorCode.ACCESS_TOKEN_EXPIRATION;
+      }
+
+      if (exception.equals(ErrorCode.ACCESS_TOKEN_NOT_FOUND.getCode())) {
+        errorCode = ErrorCode.ACCESS_TOKEN_NOT_FOUND;
       }
 
       if (exception.equals(ErrorCode.REFRESH_TOKEN_EXPIRATION.getCode())) {
