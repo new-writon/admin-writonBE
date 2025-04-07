@@ -1,6 +1,9 @@
 package com.writon.admin.global.response;
 
 import lombok.Getter;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.ResponseEntity;
 
 @Getter
 public class SuccessDto<T> {
@@ -21,5 +24,11 @@ public class SuccessDto<T> {
     this.status = 200;
     this.message = "success";
     this.data = data;
+  }
+
+  public ResponseEntity<SuccessDto<T>> toResponseEntity(HttpHeaders headers) {
+    return ResponseEntity.status(HttpStatus.OK)
+        .headers(headers)
+        .body(this);
   }
 }
