@@ -32,6 +32,10 @@ public class JwtAuthenticationEntryPoint implements AuthenticationEntryPoint {
         errorCode = ErrorCode.ACCESS_TOKEN_EXPIRATION;
       }
 
+      if (exception.equals(ErrorCode.ACCESS_TOKEN_NOT_FOUND.getCode())) {
+        errorCode = ErrorCode.ACCESS_TOKEN_NOT_FOUND;
+      }
+
       if (exception.equals(ErrorCode.REFRESH_TOKEN_EXPIRATION.getCode())) {
         errorCode = ErrorCode.REFRESH_TOKEN_EXPIRATION;
       }
