@@ -24,7 +24,6 @@ public class JwtAuthenticationEntryPoint implements AuthenticationEntryPoint {
       HttpServletResponse response,
       AuthenticationException authException
   ) throws IOException {
-//    System.out.println("JwtAuthenticationEntryPoint");
     String exception = (String) request.getAttribute("exception");
     ErrorCode errorCode = ErrorCode.UNAUTHORIZED;
 

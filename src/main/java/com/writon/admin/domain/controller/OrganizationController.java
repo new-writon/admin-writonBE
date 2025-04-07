@@ -91,13 +91,10 @@ public class OrganizationController {
   private void deleteImage() {
     Organization organization = tokenUtil.getOrganization();
     String imageUrl = organization.getLogo();
-    System.out.println("deleteImage 함수 실행" + imageUrl);
 
     if (!Objects.equals(imageUrl, "") &&
         !Objects.equals(imageUrl, DEFAULT_LOGO_URL)) {
       imageService.deleteImage(imageUrl);
-      System.out.println("deleteImage 실행" + imageUrl);
-
     }
   }
 }
