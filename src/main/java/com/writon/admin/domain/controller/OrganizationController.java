@@ -30,7 +30,7 @@ public class OrganizationController {
   private final ImageService imageService;
   private final TokenUtil tokenUtil;
 
-  private static final String DEFAULT_LOGO_URL = "https://writon-data.s3.ap-northeast-2.amazonaws.com/logo/default-logo.png";
+  private static final String DEFAULT_LOGO_URL = "https://writon-data2.s3.ap-northeast-2.amazonaws.com/logo/d4fdaf92-eb71-4f3a-979e-75211814d364.png";
 
   @PostMapping
   public SuccessDto<CreateOrganizationResponseDto> createOrganization(
