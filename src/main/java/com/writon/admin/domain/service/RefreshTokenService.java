@@ -9,7 +9,7 @@ import org.springframework.stereotype.Service;
 @AllArgsConstructor
 public class RefreshTokenService {
   private final RedisTemplate<String, Object> redisTemplate;
-  private final Long REFRESH_TOKEN_EXPIRE_TIME = 60 * 2L; // TTL: 2시간
+  private final Long REFRESH_TOKEN_EXPIRE_TIME = 60 * 24L; // TTL: 1일(24시간)
 
   public void saveRefreshToken(String email, String refreshToken) {
     redisTemplate.opsForValue().set(email, refreshToken, REFRESH_TOKEN_EXPIRE_TIME, TimeUnit.MINUTES); // 이메일을 key로 저장

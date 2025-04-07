@@ -30,8 +30,8 @@ import org.springframework.stereotype.Component;
 public class TokenProvider {
 
   private static final String AUTHORITIES_KEY = "auth";
-  private static final long ACCESS_TOKEN_EXPIRE_TIME = 1000 * 60 * 10;        // 10분
-  private static final long REFRESH_TOKEN_EXPIRE_TIME = 1000 * 60 * 60 * 2;   // 2시간
+  private static final long ACCESS_TOKEN_EXPIRE_TIME = 1000 * 60 * 60;          // 1시간 (단위: ms)
+  private static final long REFRESH_TOKEN_EXPIRE_TIME = 1000 * 60 * 60 * 24;    // 1일(24시간) (단위: ms)
 
   private final Key key;
 
