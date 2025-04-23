@@ -15,7 +15,7 @@ public class CreateChallengeRequestDto {
   private LocalDate endDate;
   private List<LocalDate> processDates;
   private List<String> basicQuestions;
-  private List<SpecialQuestion> specialQuestions;
+  private List<SpecialQuestionDto> specialQuestions;
   private List<String> emailList;
 
 }

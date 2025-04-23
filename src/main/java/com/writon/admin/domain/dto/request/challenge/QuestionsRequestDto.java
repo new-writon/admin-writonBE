@@ -10,6 +10,6 @@ import lombok.Getter;
 public class QuestionsRequestDto {
 
   private List<String> basicQuestions;
-  private List<SpecialQuestion> specialQuestions;
+  private List<SpecialQuestionDto> specialQuestions;
 
 }
