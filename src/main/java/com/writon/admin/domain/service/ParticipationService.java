@@ -1,7 +1,7 @@
 package com.writon.admin.domain.service;
 
 import com.writon.admin.domain.entity.challenge.Challenge;
-import com.writon.admin.domain.entity.lcoal.ParticipationInfo;
+import com.writon.admin.domain.dto.lcoal.ParticipationInfo;
 import com.writon.admin.domain.entity.challenge.Email;
 import com.writon.admin.domain.entity.user.Affiliation;
 import com.writon.admin.domain.entity.user.User;
@@ -22,7 +22,6 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
-import software.amazon.awssdk.services.s3.endpoints.internal.Value.Bool;
 
 @Service
 @RequiredArgsConstructor

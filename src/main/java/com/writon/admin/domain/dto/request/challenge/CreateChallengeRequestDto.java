@@ -1,6 +1,6 @@
 package com.writon.admin.domain.dto.request.challenge;
 
-import com.writon.admin.domain.entity.lcoal.SpecialQuestion;
+import com.writon.admin.domain.dto.lcoal.SpecialQuestionDto;
 import java.time.LocalDate;
 import java.util.List;
 import lombok.AllArgsConstructor;

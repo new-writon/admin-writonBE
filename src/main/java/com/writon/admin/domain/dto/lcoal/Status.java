@@ -1,4 +1,4 @@
-package com.writon.admin.domain.entity.lcoal;
+package com.writon.admin.domain.dto.lcoal;
 
 import java.time.LocalDate;
 import lombok.AllArgsConstructor;
