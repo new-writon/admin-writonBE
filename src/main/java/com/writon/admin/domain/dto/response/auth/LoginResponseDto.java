@@ -1,7 +1,6 @@
 package com.writon.admin.domain.dto.response.auth;
 
-import com.writon.admin.domain.entity.lcoal.ChallengeResponse;
-import com.writon.admin.domain.entity.organization.AdminUser;
+import com.writon.admin.domain.dto.lcoal.ChallengeResponse;
 import java.util.List;
 import lombok.AllArgsConstructor;
 import lombok.Getter;

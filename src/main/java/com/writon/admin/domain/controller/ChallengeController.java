@@ -6,7 +6,7 @@ import com.writon.admin.domain.dto.request.challenge.QuestionsRequestDto;
 import com.writon.admin.domain.dto.response.challenge.ChallengeInfoResponseDto;
 import com.writon.admin.domain.dto.response.challenge.CreateChallengeResponseDto;
 import com.writon.admin.domain.dto.response.challenge.QuestionsResponseDto;
-import com.writon.admin.domain.entity.lcoal.UserStatus;
+import com.writon.admin.domain.dto.lcoal.UserStatus;
 import com.writon.admin.domain.service.ChallengeService;
 import com.writon.admin.global.response.SuccessDto;
 import java.util.List;

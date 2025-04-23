@@ -1,6 +1,6 @@
 package com.writon.admin.domain.controller;
 
-import com.writon.admin.domain.entity.lcoal.ParticipationInfo;
+import com.writon.admin.domain.dto.lcoal.ParticipationInfo;
 import com.writon.admin.domain.service.EmailService;
 import com.writon.admin.domain.service.ParticipationService;
 import com.writon.admin.global.error.CustomException;
