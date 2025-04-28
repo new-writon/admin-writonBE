@@ -95,8 +95,7 @@ public class AuthService {
     // 7. 챌린지 정보 가져오기
     List<Challenge> challenges = Collections.emptyList();
     if (organization.isPresent()) {
-      challenges = challengeRepository.findByOrganizationId(organization.get().getId())
-          .orElse(Collections.emptyList()); // 데이터가 없을 때 빈 리스트 반환
+      challenges = challengeRepository.findByOrganizationId(organization.get().getId()); // 데이터가 없을 때 빈 리스트 반환
     }
     List<ChallengeResponse> challengeList = challenges.stream()
         .map(entity -> new ChallengeResponse(entity.getId(), entity.getName()))

@@ -7,6 +7,6 @@ import org.springframework.data.jpa.repository.JpaRepository;
 
 public interface PositionRepository extends JpaRepository<Position, Long> {
 
-  Optional<List<Position>> findByOrganizationId(Long organizationId);
+  List<Position> findByOrganizationId(Long organizationId);
 
 }

@@ -39,8 +39,7 @@ public class ParticipationService {
   // ========== Get Email API ==========
   public List<String> getEmailList(Long challengeId) {
 
-    List<Email> emailList = emailRepository.findByChallengeId(challengeId)
-        .orElseThrow(() -> new CustomException(ErrorCode.ETC_ERROR));
+    List<Email> emailList = emailRepository.findByChallengeId(challengeId);
 
     return emailList.stream().map(Email::getEmail).toList();
   }
@@ -52,8 +51,7 @@ public class ParticipationService {
         .orElseThrow(() -> new CustomException(ErrorCode.CHALLENGE_NOT_FOUND));
 
     // 2. 유저 챌린지 조회
-    List<UserChallenge> userChallengeList = userChallengeRepository.findByChallengeId(challengeId)
-        .orElseThrow(() -> new CustomException(ErrorCode.ETC_ERROR));
+    List<UserChallenge> userChallengeList = userChallengeRepository.findByChallengeId(challengeId);
 
     // 3. 유저 정보 조회
     List<ParticipationInfo> participationInfoList = new ArrayList<>();
@@ -62,8 +60,8 @@ public class ParticipationService {
       Affiliation affiliation = userChallenge.getAffiliation();
       User user = affiliation.getUser();
 
-      List<UserChallenge> userChallenges = userChallengeRepository.findByAffiliationId(affiliation.getId())
-          .orElseThrow(() -> new CustomException(ErrorCode.ETC_ERROR));
+      List<UserChallenge> userChallenges = userChallengeRepository.findByAffiliationId(affiliation.getId());
+
       String challenges = userChallenges.stream()
           .map(entity -> entity.getChallenge().getName())
           .collect(Collectors.joining(", "));
@@ -123,8 +121,10 @@ public class ParticipationService {
       emailRepository.save(new Email(email, challenge));
     }
 
-    List<Email> sendedEmailList = emailRepository.findByChallengeId(challengeId)
-        .orElseThrow(() -> new CustomException(ErrorCode.ETC_ERROR));
+    List<Email> sendedEmailList = emailRepository.findByChallengeId(challengeId);
+    if (sendedEmailList.isEmpty()) {
+      throw new CustomException(ErrorCode.EMAIL_NOT_FOUND);
+    }
 
     return sendedEmailList.stream().map(Email::getEmail).toList();
   }

@@ -98,8 +98,11 @@ public class ChallengeService {
     }
 
     // 6. Response 생성
-    List<Challenge> challenges = challengeRepository.findByOrganizationId(organization.getId())
-        .orElseThrow(() -> new CustomException(ErrorCode.CHALLENGE_NOT_FOUND));
+    List<Challenge> challenges = challengeRepository.findByOrganizationId(organization.getId());
+    if (challenges.isEmpty()) {
+      throw new CustomException(ErrorCode.CHALLENGE_NOT_FOUND);
+    }
+
     List<ChallengeResponse> challengeList = challenges.stream()
         .map(entity -> new ChallengeResponse(entity.getId(), entity.getName()))
         .collect(Collectors.toList());
@@ -110,16 +113,18 @@ public class ChallengeService {
   // ========== Get Dashboard API ==========
   public List<UserStatus> getDashboard(Long challengeId) {
     // 1. 챌린지 날짜 리스트 추출
-    List<ChallengeDay> challengeDayList = challengeDayRepository.findByChallengeId(challengeId)
-        .orElseThrow(() -> new CustomException(ErrorCode.ETC_ERROR));
+    List<ChallengeDay> challengeDayList = challengeDayRepository.findByChallengeId(challengeId);
+
+    if (challengeDayList.isEmpty()) {
+      throw new CustomException(ErrorCode.CHALLENGE_DAY_NOT_FOUND);
+    }
 
     challengeDayList = challengeDayList.stream()
         .sorted(Comparator.comparing(ChallengeDay::getDay))
         .toList();
 
     // 2. 챌린지 참여 유저 리스트 추출
-    List<UserChallenge> userChallengeList = userChallengeRepository.findByChallengeId(challengeId)
-        .orElseThrow(() -> new CustomException(ErrorCode.ETC_ERROR));
+    List<UserChallenge> userChallengeList = userChallengeRepository.findByChallengeId(challengeId);
 
     // 3. 유저별 참여여부 확인
     List<UserStatus> statusTable = new ArrayList<>();
@@ -127,8 +132,10 @@ public class ChallengeService {
     for (UserChallenge userChallenge : userChallengeList) {
       List<Status> statusList = new ArrayList<>();
       List<UserTemplate> userTemplateList = userTemplateRepository.findByUserChallengeId(
-              userChallenge.getId())
-          .orElseThrow(() -> new CustomException(ErrorCode.ETC_ERROR));
+              userChallenge.getId());
+      if (userTemplateList.isEmpty()) {
+        throw new CustomException(ErrorCode.USER_TEMPLATE_NOT_FOUND);
+      }
 
       for (ChallengeDay challengeDay : challengeDayList) {
         // 참여여부 확인과정
@@ -149,8 +156,10 @@ public class ChallengeService {
 
   // ========== Get Questions API ==========
   public QuestionsResponseDto getQuestions(Long challengeId) {
-    List<Question> questionList = questionRepository.findByChallengeId(challengeId)
-        .orElseThrow(() -> new CustomException((ErrorCode.ETC_ERROR)));
+    List<Question> questionList = questionRepository.findByChallengeId(challengeId);
+    if (questionList.isEmpty()) {
+      throw new CustomException(ErrorCode.QUESTION_NOT_FOUND);
+    }
 
     List<String> basicQuestions = questionList.stream()
         .filter(question -> question.getKeyword() == null)
@@ -182,14 +191,17 @@ public class ChallengeService {
         .orElseThrow(() -> new CustomException(ErrorCode.CHALLENGE_NOT_FOUND));
 
     // 2. 챌린지 날짜 정보 가져오기
-    List<ChallengeDay> challengeDays = challengeDayRepository.findByChallengeId(challengeId)
-        .orElseThrow(() -> new CustomException(ErrorCode.ETC_ERROR));
+    List<ChallengeDay> challengeDayList = challengeDayRepository.findByChallengeId(challengeId);
+
+    if (challengeDayList.isEmpty()) {
+      throw new CustomException(ErrorCode.CHALLENGE_DAY_NOT_FOUND);
+    }
 
     return new ChallengeInfoResponseDto(
         challenge.getName(),
         challenge.getStartAt(),
         challenge.getFinishAt(),
-        challengeDays.stream().map(ChallengeDay::getDay).collect(Collectors.toList())
+        challengeDayList.stream().map(ChallengeDay::getDay).collect(Collectors.toList())
     );
   }
 
@@ -200,8 +212,10 @@ public class ChallengeService {
         .orElseThrow(() -> new CustomException(ErrorCode.CHALLENGE_NOT_FOUND));
 
     // 2. 질문 리스트 조회
-    List<Question> questionList = questionRepository.findByChallengeId(challengeId)
-        .orElseThrow(() -> new CustomException((ErrorCode.ETC_ERROR)));
+    List<Question> questionList = questionRepository.findByChallengeId(challengeId);
+    if (questionList.isEmpty()) {
+      throw new CustomException(ErrorCode.QUESTION_NOT_FOUND);
+    }
 
     // 3. 베이직 질문 처리
     List<String> requestBasicQuestions = requestDto.getBasicQuestions();
@@ -319,8 +333,11 @@ public class ChallengeService {
     Challenge editedChallenge = challengeRepository.save(challenge);
 
     // 3. 챌린지 날짜 정보 조회
-    List<ChallengeDay> challengeDays = challengeDayRepository.findByChallengeId(challengeId)
-        .orElseThrow(() -> new CustomException(ErrorCode.ETC_ERROR));
+    List<ChallengeDay> challengeDays = challengeDayRepository.findByChallengeId(challengeId);
+
+    if (challengeDays.isEmpty()) {
+      throw new CustomException(ErrorCode.CHALLENGE_DAY_NOT_FOUND);
+    }
 
     // 4. 챌린지 날짜 정보 수정 및 저장
     // 1) 새로운 날짜가 기존 리스트에 없으면 추가
@@ -345,8 +362,11 @@ public class ChallengeService {
     }
 
     // 5. 변경된 날짜 정보 조회
-    List<ChallengeDay> editedChallengeDays = challengeDayRepository.findByChallengeId(challengeId)
-        .orElseThrow(() -> new CustomException(ErrorCode.ETC_ERROR));
+    List<ChallengeDay> editedChallengeDays = challengeDayRepository.findByChallengeId(challengeId);
+
+    if (editedChallengeDays.isEmpty()) {
+      throw new CustomException(ErrorCode.CHALLENGE_DAY_NOT_FOUND);
+    }
 
     return new ChallengeInfoResponseDto(
         editedChallenge.getName(),

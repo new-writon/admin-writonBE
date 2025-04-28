@@ -7,6 +7,6 @@ import org.springframework.data.jpa.repository.JpaRepository;
 
 public interface EmailRepository extends JpaRepository<Email, Long> {
 
-  Optional<List<Email>> findByChallengeId(Long challengeId);
+  List<Email> findByChallengeId(Long challengeId);
 
 }
