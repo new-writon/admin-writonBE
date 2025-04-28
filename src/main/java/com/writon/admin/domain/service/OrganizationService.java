@@ -34,6 +34,12 @@ public class OrganizationService {
     // 1. 사용자 정보 불러오기
     AdminUser adminUser = tokenUtil.getAdminUser();
 
+    // 1. 조직 생성 여부 확인하기
+    organizationRepository.findByAdminUserId(adminUser.getId())
+        .ifPresent(org -> {
+          throw new CustomException(ErrorCode.ORGANIZATION_DUPLICATE);
+        });
+
     // 2. Organization 객체 생성
     Organization organization = new Organization(
         createOrganizationRequestDto.getName(),

@@ -56,7 +56,7 @@ public class ChallengeService {
   private final UserTemplateRepository userTemplateRepository;
   private final EmailService emailService;
 
-  // ========== Create API ==========
+  // ========== CreateChallenge API ==========
   public CreateChallengeResponseDto createChallenge(CreateChallengeRequestDto requestDto) {
     // 1. 조직정보 추출
     Organization organization = tokenUtil.getOrganization();
@@ -179,7 +179,7 @@ public class ChallengeService {
   public ChallengeInfoResponseDto getInfo(Long challengeId) {
     // 1. 챌린지 기본 정보 가져오기
     Challenge challenge = challengeRepository.findById(challengeId)
-        .orElseThrow(() -> new CustomException(ErrorCode.ETC_ERROR));
+        .orElseThrow(() -> new CustomException(ErrorCode.CHALLENGE_NOT_FOUND));
 
     // 2. 챌린지 날짜 정보 가져오기
     List<ChallengeDay> challengeDays = challengeDayRepository.findByChallengeId(challengeId)
@@ -197,7 +197,7 @@ public class ChallengeService {
   public QuestionsResponseDto putQuestions(Long challengeId, QuestionsRequestDto requestDto) {
     // 1. 챌린지 조회
     Challenge challenge = challengeRepository.findById(challengeId)
-        .orElseThrow(() -> new CustomException(ErrorCode.ETC_ERROR));
+        .orElseThrow(() -> new CustomException(ErrorCode.CHALLENGE_NOT_FOUND));
 
     // 2. 질문 리스트 조회
     List<Question> questionList = questionRepository.findByChallengeId(challengeId)
@@ -310,7 +310,7 @@ public class ChallengeService {
   public ChallengeInfoResponseDto putInfo(Long challengeId, ChallengeInfoRequestDto requestDto) {
     // 1. 챌린지 기본 정보 조회
     Challenge challenge = challengeRepository.findById(challengeId)
-        .orElseThrow(() -> new CustomException(ErrorCode.ETC_ERROR));
+        .orElseThrow(() -> new CustomException(ErrorCode.CHALLENGE_NOT_FOUND));
 
     // 2. 챌린지 기본 정보 수정 및 저장
     challenge.setName(requestDto.getName());

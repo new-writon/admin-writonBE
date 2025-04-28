@@ -49,7 +49,7 @@ public class ParticipationService {
   public List<ParticipationInfo> getParticipationInfo(Long challengeId) {
     // 1. 챌린지 조회
     Challenge challenge = challengeRepository.findById(challengeId)
-        .orElseThrow(() -> new CustomException(ErrorCode.ETC_ERROR));
+        .orElseThrow(() -> new CustomException(ErrorCode.CHALLENGE_NOT_FOUND));
 
     // 2. 유저 챌린지 조회
     List<UserChallenge> userChallengeList = userChallengeRepository.findByChallengeId(challengeId)
@@ -104,7 +104,7 @@ public class ParticipationService {
 
     for (Long userChallengeId : userChallengeIdList) {
       UserChallenge userChallenge = userChallengeRepository.findById(userChallengeId)
-          .orElseThrow(() -> new CustomException(ErrorCode.ETC_ERROR));
+          .orElseThrow(() -> new CustomException(ErrorCode.CHALLENGE_USER_NOT_FOUND));
 
       userChallenge.setWithdrawn(true);
       userChallengeRepository.save(userChallenge);
@@ -116,7 +116,7 @@ public class ParticipationService {
   // ========== Post Participate API ==========
   public List<String> participate(Long challengeId, List<String> emailList) {
     Challenge challenge = challengeRepository.findById(challengeId)
-        .orElseThrow(() -> new CustomException(ErrorCode.ETC_ERROR));
+        .orElseThrow(() -> new CustomException(ErrorCode.CHALLENGE_NOT_FOUND));
 
     for (String email : emailList) {
       emailService.sendEmail(challenge, email);

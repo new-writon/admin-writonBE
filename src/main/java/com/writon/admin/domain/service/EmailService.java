@@ -47,7 +47,7 @@ public class EmailService {
       log.info("Succeeded to send Email");
     } catch (Exception e) {
       log.info("Failed to send Email");
-      throw new CustomException(ErrorCode.ETC_ERROR);
+      throw new CustomException(ErrorCode.EMAIL_SEND_FAILED);
     }
   }
 
