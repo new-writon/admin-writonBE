@@ -27,17 +27,26 @@ public enum ErrorCode {
   ACCESS_TOKEN_NOT_FOUND(HttpStatus.NOT_FOUND, "A05", "AccessToken이 존재하지 않습니다"),
   REFRESH_TOKEN_EXPIRATION(HttpStatus.UNAUTHORIZED, "A06", "RefreshToken이 만료되었습니다"),
   REFRESH_TOKEN_INCONSISTENCY(HttpStatus.NOT_FOUND, "A07", "RefreshToken이 일치하지 않습니다"),
-  DISABLED_USER(HttpStatus.NOT_FOUND, "A08", "비활성화된 계정입니다"),
-  LOCKED_USER(HttpStatus.NOT_FOUND, "A09", "계정이 잠겨 있습니다"),
+  DISABLED_USER(HttpStatus.FORBIDDEN, "A08", "비활성화된 계정입니다"),
+  LOCKED_USER(HttpStatus.FORBIDDEN, "A09", "계정이 잠겨 있습니다"),
+  USER_IDENTIFIER_DUPLICATE(HttpStatus.CONFLICT, "A10", "동일한 계정이 이미 존재합니다"),
 
   // organization
   ORGANIZATION_NOT_FOUND(HttpStatus.NOT_FOUND, "O01", "조직 정보를 찾을 수 없습니다"),
+  ORGANIZATION_DUPLICATE(HttpStatus.CONFLICT, "O02", "중복되는 조직이 존재합니다"),
+  POSITION_NOT_FOUND(HttpStatus.NOT_FOUND, "O03", "포지션 정보를 찾을 수 없습니다"),
 
   // challenge
   CHALLENGE_NOT_FOUND(HttpStatus.NOT_FOUND, "C01", "챌린지 정보를 찾을 수 없습니다"),
+  CHALLENGE_DAY_NOT_FOUND(HttpStatus.NOT_FOUND, "C02", "챌린지 날짜 정보를 찾을 수 없습니다"),
+  CHALLENGE_USER_NOT_FOUND(HttpStatus.NOT_FOUND, "C03", "챌린지에 참여한 유저 정보를 찾을 수 없습니다"),
+  USER_TEMPLATE_NOT_FOUND(HttpStatus.NOT_FOUND, "C04", "해당 유저의 챌린지 참여 정보를 찾을 수 없습니다"),
+  QUESTION_NOT_FOUND(HttpStatus.NOT_FOUND, "C05", "질문 정보를 찾을 수 없습니다"),
 
-  // participation
-  EMAIL_DUPLICATION(HttpStatus.BAD_REQUEST, "P01", "중복되는 이메일이 존재합니다");
+  // email
+  EMAIL_NOT_FOUND(HttpStatus.NOT_FOUND, "E01", "해당하는 이메일 정보를 찾을 수 없습니다"),
+  EMAIL_DUPLICATE(HttpStatus.CONFLICT, "E02", "중복되는 이메일이 존재합니다"),
+  EMAIL_SEND_FAILED(HttpStatus.INTERNAL_SERVER_ERROR, "E03", "이메일 전송에 실패하였습니다");
 
   private final HttpStatus httpStatus;
   private final String code;
