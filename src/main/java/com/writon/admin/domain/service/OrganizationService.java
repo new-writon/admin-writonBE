@@ -22,7 +22,6 @@ import org.springframework.stereotype.Service;
 public class OrganizationService {
 
   private final OrganizationRepository organizationRepository;
-  private final AdminUserRepository adminUserRepository;
   private final TokenUtil tokenUtil;
   private final PositionRepository positionRepository;
 
@@ -33,6 +32,12 @@ public class OrganizationService {
   ) {
     // 1. 사용자 정보 불러오기
     AdminUser adminUser = tokenUtil.getAdminUser();
+
+    // 1. 조직 생성 여부 확인하기
+    organizationRepository.findByAdminUserId(adminUser.getId())
+        .ifPresent(org -> {
+          throw new CustomException(ErrorCode.ORGANIZATION_DUPLICATE);
+        });
 
     // 2. Organization 객체 생성
     Organization organization = new Organization(
@@ -63,10 +68,12 @@ public class OrganizationService {
   public List<String> getPositions() {
     Organization organization = tokenUtil.getOrganization();
 
-    List<Position> responseDto = positionRepository.findByOrganizationId(organization.getId())
-        .orElseThrow(() -> new CustomException(ErrorCode.ETC_ERROR));
+    List<Position> positionList = positionRepository.findByOrganizationId(organization.getId());
+    if (positionList.isEmpty()) {
+      throw new CustomException(ErrorCode.POSITION_NOT_FOUND);
+    }
 
-    return responseDto.stream()
+    return positionList.stream()
         .map(Position::getName)
         .toList();
   }
@@ -97,8 +104,10 @@ public class OrganizationService {
     Organization organization = tokenUtil.getOrganization();
 
     // 1. 현재 조직의 모든 Position을 조회
-    List<Position> existingPositions = positionRepository.findByOrganizationId(organization.getId())
-        .orElseThrow(() -> new CustomException(ErrorCode.ETC_ERROR));
+    List<Position> existingPositions = positionRepository.findByOrganizationId(organization.getId());
+    if (positionList.isEmpty()) {
+      throw new CustomException(ErrorCode.POSITION_NOT_FOUND);
+    }
 
     // 2. 기존의 position names 리스트를 생성
     List<String> existingPositionNames = existingPositions.stream()

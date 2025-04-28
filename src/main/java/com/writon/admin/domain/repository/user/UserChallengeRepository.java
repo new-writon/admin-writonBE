@@ -7,7 +7,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 
 public interface UserChallengeRepository extends JpaRepository<UserChallenge, Long> {
 
-  Optional<List<UserChallenge>> findByChallengeId(Long challengeId);
-  Optional<List<UserChallenge>> findByAffiliationId(Long affiliationId);
+  List<UserChallenge> findByChallengeId(Long challengeId);
+  List<UserChallenge> findByAffiliationId(Long affiliationId);
 
 }

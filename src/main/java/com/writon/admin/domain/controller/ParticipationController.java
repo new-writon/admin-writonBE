@@ -63,7 +63,7 @@ public class ParticipationController {
 
       return new SuccessDto<>(sendedEmailList);
     } else {
-      throw new CustomException(ErrorCode.EMAIL_DUPLICATION);
+      throw new CustomException(ErrorCode.EMAIL_DUPLICATE);
     }
   }
 

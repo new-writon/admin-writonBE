@@ -48,7 +48,7 @@ public class AuthService {
   // ========== SignUp API ==========
   public SignUpResponseDto signup(SignUpRequestDto signUpRequestDto) {
     if (adminUserRepository.existsByIdentifier(signUpRequestDto.getIdentifier())) {
-      throw new CustomException(ErrorCode.ETC_ERROR);
+      throw new CustomException(ErrorCode.USER_IDENTIFIER_DUPLICATE);
     }
 
     AdminUser encodedAdminUser = signUpRequestDto.toAdminUser(passwordEncoder);
@@ -89,14 +89,13 @@ public class AuthService {
 
     // 5. 해당 Organization 정보 가져오기
     AdminUser adminUser = adminUserRepository.findByIdentifier(identifier)
-        .orElseThrow(() -> new UsernameNotFoundException(" -> 데이터베이스에서 찾을 수 없습니다."));
+        .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
     Optional<Organization> organization = organizationRepository.findByAdminUserId(adminUser.getId());
 
     // 7. 챌린지 정보 가져오기
     List<Challenge> challenges = Collections.emptyList();
     if (organization.isPresent()) {
-      challenges = challengeRepository.findByOrganizationId(organization.get().getId())
-          .orElse(Collections.emptyList()); // 데이터가 없을 때 빈 리스트 반환
+      challenges = challengeRepository.findByOrganizationId(organization.get().getId()); // 데이터가 없을 때 빈 리스트 반환
     }
     List<ChallengeResponse> challengeList = challenges.stream()
         .map(entity -> new ChallengeResponse(entity.getId(), entity.getName()))

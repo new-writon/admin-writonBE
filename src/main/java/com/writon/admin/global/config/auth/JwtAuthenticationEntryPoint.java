@@ -43,6 +43,7 @@ public class JwtAuthenticationEntryPoint implements AuthenticationEntryPoint {
       if (exception.equals(ErrorCode.UNAUTHORIZED_TOKEN.getCode())) {
         errorCode = ErrorCode.UNAUTHORIZED_TOKEN;
       }
+
     }
 
     exceptionResponseHandler.setResponse(response, errorCode);
