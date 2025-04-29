@@ -40,8 +40,7 @@ public enum ErrorCode {
   CHALLENGE_NOT_FOUND(HttpStatus.NOT_FOUND, "C01", "챌린지 정보를 찾을 수 없습니다"),
   CHALLENGE_DAY_NOT_FOUND(HttpStatus.NOT_FOUND, "C02", "챌린지 날짜 정보를 찾을 수 없습니다"),
   CHALLENGE_USER_NOT_FOUND(HttpStatus.NOT_FOUND, "C03", "챌린지에 참여한 유저 정보를 찾을 수 없습니다"),
-  USER_TEMPLATE_NOT_FOUND(HttpStatus.NOT_FOUND, "C04", "해당 유저의 챌린지 참여 정보를 찾을 수 없습니다"),
-  QUESTION_NOT_FOUND(HttpStatus.NOT_FOUND, "C05", "질문 정보를 찾을 수 없습니다"),
+  QUESTION_NOT_FOUND(HttpStatus.NOT_FOUND, "C04", "질문 정보를 찾을 수 없습니다"),
 
   // email
   EMAIL_NOT_FOUND(HttpStatus.NOT_FOUND, "E01", "해당하는 이메일 정보를 찾을 수 없습니다"),

@@ -133,9 +133,6 @@ public class ChallengeService {
       List<Status> statusList = new ArrayList<>();
       List<UserTemplate> userTemplateList = userTemplateRepository.findByUserChallengeId(
               userChallenge.getId());
-      if (userTemplateList.isEmpty()) {
-        throw new CustomException(ErrorCode.USER_TEMPLATE_NOT_FOUND);
-      }
 
       for (ChallengeDay challengeDay : challengeDayList) {
         // 참여여부 확인과정
