@@ -88,10 +88,12 @@ public class ChallengeService {
     }
 
     // 5. 이메일 전송 & 정보 저장
-    for (String email : requestDto.getEmailList()) {
-      emailService.sendEmail(challenge, email);
-      emailRepository.save(new Email(email, challenge));
-    }
+    emailService.sendEmail(challenge, requestDto.getEmailList());
+
+    List<Email> emailEntities = requestDto.getEmailList().stream()
+        .map(email -> new Email(email, challenge))
+        .collect(Collectors.toList());
+    emailRepository.saveAll(emailEntities);
 
     // 6. Response 생성
     List<Challenge> challenges = challengeRepository.findByOrganizationId(organization.getId());
@@ -128,7 +130,7 @@ public class ChallengeService {
     for (UserChallenge userChallenge : userChallengeList) {
       List<Status> statusList = new ArrayList<>();
       List<UserTemplate> userTemplateList = userTemplateRepository.findByUserChallengeId(
-              userChallenge.getId());
+          userChallenge.getId());
 
       for (ChallengeDay challengeDay : challengeDayList) {
         // 참여여부 확인과정
