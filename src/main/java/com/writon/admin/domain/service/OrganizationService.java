@@ -7,7 +7,6 @@ import com.writon.admin.domain.dto.response.organization.EditOrganizationRespons
 import com.writon.admin.domain.entity.organization.AdminUser;
 import com.writon.admin.domain.entity.organization.Organization;
 import com.writon.admin.domain.entity.organization.Position;
-import com.writon.admin.domain.repository.organization.AdminUserRepository;
 import com.writon.admin.domain.repository.organization.OrganizationRepository;
 import com.writon.admin.domain.repository.organization.PositionRepository;
 import com.writon.admin.domain.util.TokenUtil;
