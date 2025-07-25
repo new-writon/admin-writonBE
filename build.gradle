@@ -15,6 +15,7 @@ java {
 
 repositories {
 	mavenCentral()
+	maven { url 'https://jitpack.io' }
 }
 
 dependencies {
@@ -44,10 +45,9 @@ dependencies {
 	implementation 'io.awspring.cloud:spring-cloud-aws-s3:3.1.0'
 	implementation 'javax.xml.bind:jaxb-api:2.3.1'
 
-	// mail
-	implementation 'org.springframework.boot:spring-boot-starter-mail'
-	implementation 'org.springframework.boot:spring-boot-starter-thymeleaf' // option
-	implementation 'nz.net.ultraq.thymeleaf:thymeleaf-layout-dialect' // option
+	// brevo
+	implementation 'com.sendinblue:sib-api-v3-sdk:7.0.0'
+
 
 	// lombok
 	implementation 'org.projectlombok:lombok'

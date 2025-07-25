@@ -116,10 +116,12 @@ public class ParticipationService {
     Challenge challenge = challengeRepository.findById(challengeId)
         .orElseThrow(() -> new CustomException(ErrorCode.CHALLENGE_NOT_FOUND));
 
-    for (String email : emailList) {
-      emailService.sendEmail(challenge, email);
-      emailRepository.save(new Email(email, challenge));
-    }
+    emailService.sendEmail(challenge, emailList);
+
+    List<Email> emailEntities = emailList.stream()
+        .map(email -> new Email(email, challenge))
+        .collect(Collectors.toList());
+    emailRepository.saveAll(emailEntities);
 
     List<Email> sendedEmailList = emailRepository.findByChallengeId(challengeId);
     if (sendedEmailList.isEmpty()) {

@@ -5,70 +5,84 @@ import com.writon.admin.domain.entity.organization.Organization;
 import com.writon.admin.domain.util.TokenUtil;
 import com.writon.admin.global.error.CustomException;
 import com.writon.admin.global.error.ErrorCode;
-import jakarta.mail.internet.MimeMessage;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
-import org.thymeleaf.context.Context;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.mail.javamail.JavaMailSender;
-import org.springframework.mail.javamail.MimeMessageHelper;
-import org.springframework.scheduling.annotation.Async;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
-import org.thymeleaf.spring6.SpringTemplateEngine;
+import sendinblue.ApiClient;
+import sendinblue.ApiException;
+import sendinblue.Configuration;
+import sendinblue.auth.ApiKeyAuth;
+import sibApi.TransactionalEmailsApi;
+import sibModel.CreateSmtpEmail;
+import sibModel.SendSmtpEmail;
+import sibModel.SendSmtpEmailMessageVersions;
+import sibModel.SendSmtpEmailTo1;
 
 @Service
 @RequiredArgsConstructor
 @Slf4j
 public class EmailService {
 
-  private final JavaMailSender javaMailSender;
-  private final SpringTemplateEngine templateEngine;
   private final TokenUtil tokenUtil;
 
-  @Async
-  public void sendEmail(Challenge challenge, String email) {
-    MimeMessage mimeMessage = javaMailSender.createMimeMessage();
+  @Value("${email.apiKey}")
+  private String BREVO_API_KEY;
+
+  @Value("${email.templateId}")
+  private Long BREVO_TEMPLATE_ID;
+
+  public void sendEmail(Challenge challenge, List<String> emailList) {
     Organization organization = tokenUtil.getOrganization();
+    String baseUrl = "https://www.writon.co.kr/login";
+    String link = String.format(
+        "%s?organization=%s&challengeId=%s", baseUrl,
+        encodeURIComponent(organization.getName()),
+        encodeURIComponent(String.valueOf(challenge.getId()))
+    );
+
+    ApiClient defaultClient = Configuration.getDefaultApiClient();
+
+    ApiKeyAuth apiKey = (ApiKeyAuth) defaultClient.getAuthentication("api-key");
+    apiKey.setApiKey(BREVO_API_KEY);
+
+    // 수신자 리스트 구성
+    List<SendSmtpEmailMessageVersions> messageVersions = new ArrayList<>();
+
+    for (String email : emailList) {
+      messageVersions.add(new SendSmtpEmailMessageVersions()
+          .to(List.of(new SendSmtpEmailTo1().email(email)))
+          .params(Map.of(
+              "ORGANIZATION", organization.getName(),
+              "CHALLENGE", challenge.getName(),
+              "EMAIL", email,
+              "LINK", link
+          )));
+    }
+
+    TransactionalEmailsApi apiInstance = new TransactionalEmailsApi();
+    SendSmtpEmail sendSmtpEmail = new SendSmtpEmail()
+        // 템플릿 종류
+        .templateId(BREVO_TEMPLATE_ID)
+        // 동적 param값 설정
+        .messageVersions(messageVersions);
 
     try {
-      MimeMessageHelper mimeMessageHelper = new MimeMessageHelper(mimeMessage, false, "UTF-8");
-      mimeMessageHelper.setTo(email);
-      mimeMessageHelper.setSubject(String.format(
-          "[Writon] %s의 챌린지에 참여해보세요",
-          organization.getName()
-      )); // 메일 제목
-      mimeMessageHelper.setText(
-          setContext(organization.getName(), challenge.getName(), challenge.getId(), email),
-          true
-      ); // 메일 본문 내용, HTML 여부
-      javaMailSender.send(mimeMessage);
-
-      log.info("Succeeded to send Email");
-    } catch (Exception e) {
-      log.info("Failed to send Email");
+      CreateSmtpEmail result = apiInstance.sendTransacEmail(sendSmtpEmail);
+      log.info("Succeded to send Email: {}", result);
+    } catch (ApiException e) {
+      log.error("Failed to send Email");
       throw new CustomException(ErrorCode.EMAIL_SEND_FAILED);
     }
-  }
-
-  //thymeleaf를 통한 html 적용
-  public String setContext(String organization, String challenge, Long challengeId, String email) {
-    Context context = new Context();
-    context.setVariable("organization", organization);
-    context.setVariable("challenge", challenge);
-    context.setVariable("email", email);
-    context.setVariable("challengeId", challengeId);
-
-    String baseUrl = "https://www.writon.co.kr/login";
-    String link = String.format("%s?organization=%s&challengeId=%s", baseUrl,
-        encodeURIComponent(organization),
-        encodeURIComponent(String.valueOf(challengeId)));
-    context.setVariable("link", link);
-
-    return templateEngine.process("participate_card", context);
   }
 
   private String encodeURIComponent(String value) {
     return URLEncoder.encode(value, StandardCharsets.UTF_8);
   }
+
 }

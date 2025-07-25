@@ -17,6 +17,7 @@ public enum ErrorCode {
   METHOD_NOT_ALLOWED(HttpStatus.METHOD_NOT_ALLOWED, "405", "허용되지 않은 메소드입니다"), // 405 Method Not Allowed
   CONFLICT(HttpStatus.CONFLICT, "409", "이미 가입한 사용자입니다"), // 409 Conflict
   INTERNAL_SERVER_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "500", "서버에 오류가 발생하였습니다"), // 500 Internal Server Error
+  GATEWAY_TIMEOUT_ERROR(HttpStatus.GATEWAY_TIMEOUT, "504", "연결 시간을 초과하였습니다"), // 503 Gateway Timeout
   ETC_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "0314", "사용자 지정 오류"),
 
   // auth
